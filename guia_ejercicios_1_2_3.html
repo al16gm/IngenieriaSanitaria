@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingeniería Sanitaria — Ejercicios 1, 2 y 3</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2336;
+    --border: #2a304a;
+    --accent: #4f9cf9;
+    --accent2: #f97b4f;
+    --accent3: #4fd9a0;
+    --text: #e8eaf2;
+    --text-muted: #7a82a0;
+    --text-dim: #4a5070;
+    --formula-bg: #131824;
+    --yellow: #f9d94f;
+    --red: #f94f6c;
+    --purple: #b96ff9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 2rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #0f1117 0%, #141928 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,156,249,0.08) 0%, transparent 70%);
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--text);
+    line-height: 1.15;
+    max-width: 700px;
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .header-sub {
+    margin-top: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  /* ── NAV PILLS ── */
+  .nav-pills {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+  }
+  .pill {
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  .pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .pill.ej2.active { background: var(--accent2); border-color: var(--accent2); }
+  .pill.ej3.active { background: var(--accent3); border-color: var(--accent3); color: #0f1117; }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 2rem 3rem 4rem; max-width: 1100px; }
+
+  /* ── SECTION / EXERCISE ── */
+  .exercise { display: none; }
+  .exercise.visible { display: block; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.4rem;
+  }
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-blue { background: var(--accent); }
+  .dot-orange { background: var(--accent2); }
+  .dot-green { background: var(--accent3); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red { background: var(--red); }
+  .dot-purple { background: var(--purple); }
+
+  /* ── EXERCISE HEADER ── */
+  .ex-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.8rem;
+  }
+  .ex-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--border);
+    flex-shrink: 0;
+    margin-top: -0.3rem;
+  }
+  .ex-intro h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+  .ex-intro p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* ── DATA TABLE ── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .data-cell {
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+  }
+  .data-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+  .data-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--yellow);
+  }
+  .data-unit {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-left: 0.3rem;
+  }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 1.4rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+  .step-num.accent { border-color: var(--accent); color: var(--accent); }
+  .step-num.orange { border-color: var(--accent2); color: var(--accent2); }
+  .step-num.green  { border-color: var(--accent3); color: var(--accent3); }
+  .step-body h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+  }
+  .step-body p, .step-body li {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .step-body ul { padding-left: 1.2rem; }
+
+  /* ── FORMULA BOX ── */
+  .formula {
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.2rem;
+    margin: 0.6rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .formula.orange { border-left-color: var(--accent2); }
+  .formula.green  { border-left-color: var(--accent3); }
+  .formula.yellow { border-left-color: var(--yellow); }
+
+  .val { color: var(--yellow); font-weight: 500; }
+  .val-blue { color: var(--accent); font-weight: 500; }
+  .val-green { color: var(--accent3); font-weight: 500; }
+  .val-orange { color: var(--accent2); font-weight: 500; }
+  .val-red { color: var(--red); font-weight: 500; }
+  .val-purple { color: var(--purple); font-weight: 500; }
+  .result { color: var(--accent3); font-weight: 600; font-size: 1.05em; }
+  .result-box {
+    display: inline-block;
+    background: rgba(79,217,160,0.1);
+    border: 1px solid var(--accent3);
+    border-radius: 6px;
+    padding: 0.15rem 0.6rem;
+    color: var(--accent3);
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+  }
+  .result-box.orange {
+    background: rgba(249,123,79,0.1);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .result-box.blue {
+    background: rgba(79,156,249,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(79,217,160,0.12);
+    border: 1px solid rgba(79,217,160,0.3);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent3);
+    font-weight: 500;
+    margin-left: 0.4rem;
+  }
+  .badge.fail {
+    background: rgba(249,79,108,0.12);
+    border-color: rgba(249,79,108,0.3);
+    color: var(--red);
+  }
+
+  /* ── THORMANN TABLE ── */
+  .tf-table-wrapper {
+    overflow: auto;
+    max-height: 400px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 0.8rem;
+  }
+  .tf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .tf-table thead th {
+    background: var(--surface2);
+    color: var(--accent);
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .tf-table tbody tr { border-bottom: 1px solid rgba(42,48,74,0.5); }
+  .tf-table tbody tr:hover { background: var(--surface2); }
+  .tf-table tbody td {
+    padding: 0.35rem 0.8rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .tf-table tbody tr.highlight td {
+    background: rgba(249,217,79,0.08);
+    color: var(--yellow);
+    font-weight: 500;
+  }
+  .tf-table tbody tr.highlight2 td {
+    background: rgba(79,156,249,0.08);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ── CURVE CHART ── */
+  canvas { display: block; }
+  .chart-wrapper {
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.8rem;
+    position: relative;
+  }
+  .chart-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+
+  /* ── CONDITIONS CHECKS ── */
+  .conditions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 720px) {
+    .conditions-grid { grid-template-columns: 1fr; }
+  }
+  .cond-card {
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .cond-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .cond-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    line-height: 1.4;
+  }
+  .cond-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent3);
+    margin-bottom: 0.3rem;
+  }
+  .cond-check {
+    font-size: 0.8rem;
+    color: var(--accent3);
+  }
+  .cond-check.fail { color: var(--red); }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── OVOIDE SHAPE ── */
+  .shape-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 0.8rem;
+  }
+
+  /* ── ALERT BOX ── */
+  .alert {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    padding: 0.9rem 1.1rem;
+    border-radius: 8px;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  .alert.info {
+    background: rgba(79,156,249,0.08);
+    border: 1px solid rgba(79,156,249,0.2);
+    color: #a0c4ff;
+  }
+  .alert.warn {
+    background: rgba(249,217,79,0.07);
+    border: 1px solid rgba(249,217,79,0.2);
+    color: #ffe47a;
+  }
+  .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── SECTION DIVIDER ── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 0.5rem 0 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 1.8rem;
+  }
+
+  /* ── SUMMARY ROW ── */
+  .summary-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+  }
+  .summary-item {
+    flex: 1;
+    min-width: 140px;
+    background: var(--formula-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
+  .summary-item .si-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+  }
+  .summary-item .si-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Ingeniería Sanitaria · Saneamiento</div>
+  <h1>Dimensionamiento de <em>Colectores</em></h1>
+  <p class="header-sub">Ejercicios 1, 2 y 3 · Secciones circular y ovoide · Thormann &amp; Franke</p>
+</header>
+
+<nav class="nav-pills">
+  <button class="pill active" onclick="show('ej1', this)">Ej. 1 — Sección circular (gráficas + tablas)</button>
+  <button class="pill ej2" onclick="show('ej2', this)">Ej. 2 — Colector mixto + verificación</button>
+  <button class="pill ej3" onclick="show('ej3', this)">Ej. 3 — Sección ovoide</button>
+  <button class="pill" onclick="show('tablatf', this)">📊 Tabla Thormann &amp; Franke</button>
+  <button class="pill" onclick="show('graficas', this)">📈 Gráficas Interactivas</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════════
+     EJERCICIO 1
+══════════════════════════════════════════════ -->
+<section class="exercise visible" id="ej1">
+  <div class="ex-header">
+    <div class="ex-number">01</div>
+    <div class="ex-intro">
+      <h2>Dimensionamiento sección circular</h2>
+      <p>Dado un colector circular de diámetro conocido, pendiente y coeficiente de Manning, calcular el <strong>calado y</strong> y la <strong>velocidad media v</strong> para un caudal de diseño. Se resuelve por dos métodos: a) Gráficas de Thormann y Franke, b) Tabla de Thormann y Franke.</p>
+    </div>
+  </div>
+
+  <!-- DATOS -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-blue"></span> Datos del problema</div>
+    <div class="data-grid">
+      <div class="data-cell"><div class="data-label">Diámetro (Ø)</div><div class="data-value">800 <span class="data-unit">mm</span></div></div>
+      <div class="data-cell"><div class="data-label">Caudal de diseño Q</div><div class="data-value">675 <span class="data-unit">l/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Pendiente j</div><div class="data-value">6 <span class="data-unit">‰ (0.006)</span></div></div>
+      <div class="data-cell"><div class="data-label">Coef. Manning n</div><div class="data-value">0.014</div></div>
+    </div>
+    <div class="alert info">
+      <span class="alert-icon">ℹ</span>
+      <span>Se pide calcular el calado <em>y</em> (altura lámina de agua) y la velocidad media <em>v</em> mediante: <strong>a)</strong> Gráficas de Thormann y Franke &nbsp;·&nbsp; <strong>b)</strong> Tablas de Thormann y Franke.</span>
+    </div>
+  </div>
+
+  <!-- PASO 0: Q lleno -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Paso previo — Caudal a sección llena (Q_ll)</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num accent">1</div>
+        <div class="step-body">
+          <h4>Radio hidráulico a sección llena</h4>
+          <p>Para tubería circular llena, el radio hidráulico R<sub>H</sub> es:</p>
+          <div class="formula">
+            R<sub>H</sub> = S<sub>m</sub> / P<sub>m</sub> = (π·r²) / (2π·r) = r/2 = D/4
+            <br>R<sub>H</sub> = <span class="val">0.8</span>/4 = <span class="result-box blue">0.2 m</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">2</div>
+        <div class="step-body">
+          <h4>Fórmula de Manning-Strickler aplicada a sección llena</h4>
+          <div class="formula">
+            Q<sub>ll</sub> = (1/n) · R<sub>H</sub><sup>2/3</sup> · j<sup>1/2</sup> · S
+            <br>Q<sub>ll</sub> = (1/<span class="val">0.014</span>) · <span class="val">0.2</span><sup>2/3</sup> · <span class="val">0.006</span><sup>1/2</sup> · <span class="val">0.5024</span>
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; donde S = π · r² = π · 0.4² = 0.5024 m²
+            <br>Q<sub>ll</sub> = <span class="result-box">0.9511 m³/s = 951.1 l/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÉTODO A -->
+  <div class="section-label">Método a) — Gráficas de Thormann y Franke</div>
+  <div class="card">
+    <div class="card-title"><span class="dot dot-blue"></span> Procedimiento gráfico</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num accent">1</div>
+        <div class="step-body">
+          <h4>Calcular la relación Q/Q<sub>ll</sub></h4>
+          <div class="formula">
+            Q/Q<sub>ll</sub> = <span class="val">675</span> / <span class="val">951.1</span> = <span class="result-box blue">0.71</span>
+          </div>
+          <p>Esta relación es el valor que <strong>entra por el eje vertical</strong> de las curvas de Thormann y Franke (la curva de "caudal").</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">2</div>
+        <div class="step-body">
+          <h4>Entrar en la gráfica por la curva de <em>Caudal</em></h4>
+          <p>Con Q/Q<sub>ll</sub> = 0.71 en el eje Y, trazar horizontal hasta cortar la curva de <strong>caudal</strong>. Bajar verticalmente al eje X para leer:</p>
+          <div class="formula">
+            y/D → <span class="result-box blue">0.62</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">3</div>
+        <div class="step-body">
+          <h4>Leer V/V<sub>ll</sub> desde el mismo punto</h4>
+          <p>Desde y/D = 0.62, trazar vertical hasta cortar la curva de <strong>velocidad</strong>, luego horizontal al eje Y:</p>
+          <div class="formula">
+            V/V<sub>ll</sub> → <span class="result-box blue">1.08</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">4</div>
+        <div class="step-body">
+          <h4>Calcular calado y velocidad reales</h4>
+          <div class="formula">
+            y = (y/D) · D = <span class="val">0.62</span> · <span class="val">0.8</span> = <span class="result-box">0.496 m ≈ 496 mm</span>
+            <br><br>
+            V<sub>ll</sub> = Q<sub>ll</sub>/S<sub>ll</sub> = 0.9511/0.5024 = <span class="val">1.892 m/s</span>
+            <br>
+            V = (V/V<sub>ll</sub>) · V<sub>ll</sub> = <span class="val">1.08</span> · <span class="val">1.892</span> = <span class="result-box">2.043 m/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÉTODO B -->
+  <div class="section-label">Método b) — Tablas de Thormann y Franke</div>
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Procedimiento tabular</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Buscar Q/Q<sub>ll</sub> = 0.71 en la tabla</h4>
+          <p>En la columna Q/Q<sub>ll</sub> buscamos el valor 0.71. Se localiza directamente la fila:</p>
+          <div class="tf-table-wrapper" style="max-height:140px;">
+            <table class="tf-table">
+              <thead><tr><th>y/D</th><th>V/V<sub>ll</sub></th><th>Q/Q<sub>ll</sub></th></tr></thead>
+              <tbody>
+                <tr><td>0.625</td><td>1.06</td><td>0.70</td></tr>
+                <tr class="highlight"><td>0.633</td><td>1.06</td><td>0.71</td></tr>
+                <tr><td>0.640</td><td>1.07</td><td>0.72</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Obtener y/D y V/V<sub>ll</sub></h4>
+          <div class="formula">
+            Para Q/Q<sub>ll</sub> = <span class="val">0.71</span> → y/D = <span class="val">0.633</span> ; V/V<sub>ll</sub> = <span class="val">1.06</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Calcular calado y velocidad</h4>
+          <div class="formula">
+            y = <span class="val">0.633</span> · <span class="val">0.8</span> = <span class="result-box">506 mm</span>
+            <br><br>
+            V = <span class="val">1.06</span> · V<sub>ll</sub> = <span class="val">1.06</span> · <span class="val">1.892</span> = <span class="result-box">2.006 m/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert warn">
+      <span class="alert-icon">⚠</span>
+      <span>Las pequeñas diferencias entre ambos métodos (496 mm vs 506 mm) se deben a la precisión de lectura gráfica. El método tabular es más exacto. Ambos son válidos en la práctica profesional.</span>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Resumen de resultados</div>
+    <div class="summary-row">
+      <div class="summary-item"><div class="si-label">Método</div><div class="si-val">Gráfica / Tabla</div></div>
+      <div class="summary-item"><div class="si-label">Q/Q<sub>ll</sub></div><div class="si-val">0.71</div></div>
+      <div class="summary-item"><div class="si-label">Calado y (gráf.)</div><div class="si-val" style="color:var(--accent3)">496 mm</div></div>
+      <div class="summary-item"><div class="si-label">Calado y (tabla)</div><div class="si-val" style="color:var(--accent3)">506 mm</div></div>
+      <div class="summary-item"><div class="si-label">Velocidad (gráf.)</div><div class="si-val" style="color:var(--accent2)">2.04 m/s</div></div>
+      <div class="summary-item"><div class="si-label">Velocidad (tabla)</div><div class="si-val" style="color:var(--accent2)">2.01 m/s</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     EJERCICIO 2
+══════════════════════════════════════════════ -->
+<section class="exercise" id="ej2">
+  <div class="ex-header">
+    <div class="ex-number" style="color:#2a304a">02</div>
+    <div class="ex-intro">
+      <h2>Colector de saneamiento — Año actual y horizonte</h2>
+      <p>Dimensionar un colector de sección circular para un sector urbano con caudales actuales y de horizonte (25 años). Verificar las tres condiciones de velocidad.</p>
+    </div>
+  </div>
+
+  <!-- DATOS -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-orange"></span> Datos del problema</div>
+    <div class="data-grid">
+      <div class="data-cell"><div class="data-label">Q_med actual</div><div class="data-value">0.05 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_min actual</div><div class="data-value">0.02 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_p actual (neg.)</div><div class="data-value">0.12 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_pl actual</div><div class="data-value">1.00 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_med + 25 años</div><div class="data-value">0.15 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_min + 25 años</div><div class="data-value">0.06 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_p + 25 años</div><div class="data-value">0.30 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Q_pl + 25 años</div><div class="data-value">1.50 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Pendiente j</div><div class="data-value">1 <span class="data-unit">‰ (0.001)</span></div></div>
+      <div class="data-cell"><div class="data-label">Coef. Manning n</div><div class="data-value">0.0137</div></div>
+    </div>
+    <div class="alert info">
+      <span class="alert-icon">ℹ</span>
+      <span>Red de <strong>alcantarillado</strong> → colector de <em>drenaje + saneamiento</em>. Se usa la Tabla de Thormann y Franke con j = 1‰ y n = 0.0137.</span>
+    </div>
+  </div>
+
+  <!-- PASO 1: CAUDALES DE CÁLCULO -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-orange"></span> Paso 1 — Caudales de cálculo</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num orange">1</div>
+        <div class="step-body">
+          <h4>Q<sub>máx</sub> (para dimensionar el diámetro)</h4>
+          <p>Se toma la suma de los máximos: aguas negras punta horizonte + pluviales horizonte.</p>
+          <div class="formula orange">
+            Q<sub>máx</sub> = Q<sub>p,n</sub>(+25a) + Q<sub>pl</sub>(+25a) = <span class="val">0.30</span> + <span class="val">1.50</span> = <span class="result-box orange">1.80 m³/s</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num orange">2</div>
+        <div class="step-body">
+          <h4>Q<sub>p</sub> (para comprobar V &lt; 3 m/s en aguas negras)</h4>
+          <div class="formula orange">
+            Q<sub>p</sub> = Q<sub>p,n</sub>(+25a) = <span class="result-box orange">0.30 m³/s</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num orange">3</div>
+        <div class="step-body">
+          <h4>Q<sub>min</sub> (para comprobar V &gt; 0.6 m/s, arrastre)</h4>
+          <div class="formula orange">
+            Q<sub>min</sub> = Q<sub>min,n</sub>(actual) = <span class="result-box orange">0.02 m³/s</span>
+            <br><small style="color:var(--text-dim)">← El peor caso es en el año actual, ya que hay menos caudal</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2: DIÁMETRO -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-orange"></span> Paso 2 — Cálculo del diámetro necesario</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num orange">1</div>
+        <div class="step-body">
+          <h4>Aplicar Manning a sección llena para Q<sub>máx</sub></h4>
+          <p>Despejando D de la fórmula de Manning para sección circular llena:</p>
+          <div class="formula orange">
+            Q = (1/n) · (D/4)<sup>2/3</sup> · j<sup>1/2</sup> · (π·D²/4)
+            <br><br>
+            1.8 = (1/<span class="val">0.0137</span>) · (D/4)<sup>2/3</sup> · <span class="val">0.001</span><sup>1/2</sup> · π·D²/4
+            <br><br>
+            1.8 = 2.275 · D<sup>8/3</sup>
+            <br><br>
+            D = (1.8 / 2.275)<sup>3/8</sup> = <span class="val">0.916 m</span> → <span class="result-box orange">Ø comercial = 1000 mm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 3: VERIFICACIÓN DE VELOCIDADES -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Paso 3 — Comprobación de velocidades con Ø = 1000 mm</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">0</div>
+        <div class="step-body">
+          <h4>Q<sub>ll</sub> y V<sub>ll</sub> para Ø = 1000 mm</h4>
+          <div class="formula">
+            Q<sub>ll</sub> = (1/0.0137)·(0.25)<sup>2/3</sup>·(0.001)<sup>1/2</sup>·(π·1²/4) = <span class="result-box blue">2.27 m³/s</span>
+            <br>V<sub>ll</sub> = Q<sub>ll</sub>/S = 2.27 / (π·1²/4) = <span class="result-box blue">2.89 m/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conditions-grid">
+      <!-- COND 1 -->
+      <div class="cond-card">
+        <div class="cond-label">1ª Condición</div>
+        <div class="cond-desc">Q<sub>máx</sub> → V &lt; 5 m/s<br>(erosión)</div>
+        <div class="cond-value">3.29 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub>=0.793 → y/D=0.69 → V/V<sub>ll</sub>=1.14<br>
+          V = 1.14 · 2.89
+        </div>
+        <div class="cond-check">✓ 3.29 &lt; 5 m/s &nbsp; CUMPLE</div>
+      </div>
+      <!-- COND 2 -->
+      <div class="cond-card">
+        <div class="cond-label">2ª Condición</div>
+        <div class="cond-desc">Q<sub>p,n</sub> → V &lt; 3 m/s<br>(aguas negras)</div>
+        <div class="cond-value">2.02 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub>=0.132 → y/D=0.24 → V/V<sub>ll</sub>=0.70<br>
+          V = 0.70 · 2.89
+        </div>
+        <div class="cond-check">✓ 2.02 &lt; 3 m/s &nbsp; CUMPLE</div>
+      </div>
+      <!-- COND 3 -->
+      <div class="cond-card">
+        <div class="cond-label">3ª Condición</div>
+        <div class="cond-desc">Q<sub>min</sub> → V &gt; 0.6 m/s<br>(arrastre de sólidos)</div>
+        <div class="cond-value">0.92 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub>=0.0088 → y/D=0.15 → V/V<sub>ll</sub>=0.33<br>
+          V = 0.33 · 2.89
+        </div>
+        <div class="cond-check">✓ 0.92 &gt; 0.6 m/s &nbsp; CUMPLE</div>
+      </div>
+    </div>
+
+    <div class="alert" style="background:rgba(79,217,160,0.08);border:1px solid rgba(79,217,160,0.2);color:var(--accent3);margin-top:1rem;">
+      <span class="alert-icon">✅</span>
+      <span>Las tres condiciones se cumplen con <strong>Ø = 1000 mm</strong>. Este es el diámetro de diseño.</span>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Resumen Ejercicio 2</div>
+    <div class="summary-row">
+      <div class="summary-item"><div class="si-label">Ø elegido</div><div class="si-val" style="color:var(--accent2)">1000 mm</div></div>
+      <div class="summary-item"><div class="si-label">Q<sub>ll</sub></div><div class="si-val">2.27 m³/s</div></div>
+      <div class="summary-item"><div class="si-label">V<sub>ll</sub></div><div class="si-val">2.89 m/s</div></div>
+      <div class="summary-item"><div class="si-label">1ª cond.</div><div class="si-val" style="color:var(--accent3)">✓ CUMPLE</div></div>
+      <div class="summary-item"><div class="si-label">2ª cond.</div><div class="si-val" style="color:var(--accent3)">✓ CUMPLE</div></div>
+      <div class="summary-item"><div class="si-label">3ª cond.</div><div class="si-val" style="color:var(--accent3)">✓ CUMPLE</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     EJERCICIO 3
+══════════════════════════════════════════════ -->
+<section class="exercise" id="ej3">
+  <div class="ex-header">
+    <div class="ex-number" style="color:#2a304a">03</div>
+    <div class="ex-intro">
+      <h2>Dimensionamiento sección ovoide</h2>
+      <p>Para una población de 302.400 hab con dotación de 250 l/hab·día, calcular caudales de aguas negras y dimensionar un colector ovoide unitario verificando las tres condiciones de velocidad.</p>
+    </div>
+  </div>
+
+  <!-- DATOS -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Datos del problema</div>
+    <div class="data-grid">
+      <div class="data-cell"><div class="data-label">Población</div><div class="data-value">302.400 <span class="data-unit">hab</span></div></div>
+      <div class="data-cell"><div class="data-label">Dotación D<sub>ap</sub></div><div class="data-value">250 <span class="data-unit">l/hab·día</span></div></div>
+      <div class="data-cell"><div class="data-label">C<sub>retorno</sub></div><div class="data-value">0.8</div></div>
+      <div class="data-cell"><div class="data-label">C<sub>p</sub> (punta)</div><div class="data-value">1.4</div></div>
+      <div class="data-cell"><div class="data-label">Q pluviales</div><div class="data-value">1.344 <span class="data-unit">m³/s</span></div></div>
+      <div class="data-cell"><div class="data-label">Pendiente j</div><div class="data-value">0.5 <span class="data-unit">‰ (0.0005)</span></div></div>
+      <div class="data-cell"><div class="data-label">Coef. Manning n</div><div class="data-value">0.015</div></div>
+    </div>
+    <div class="alert info">
+      <span class="alert-icon">ℹ</span>
+      <span>Ovoide normalizado: <strong>H = 1.5·D</strong>. Radios hidráulico y área: R<sub>H,ovoid</sub> = 0.193H − 0.193D &nbsp;·&nbsp; S<sub>ovoid</sub> = 0.51H² − 0.51D²<br>
+      Dimensiones comerciales posibles: 60×90, 90×135, 100×150, 120×180, 140×210 (D×H en cm)</span>
+    </div>
+  </div>
+
+  <!-- PARTE A: Caudales aguas negras -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Apartado a) — Caudales de aguas negras</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num green">1</div>
+        <div class="step-body">
+          <h4>Consumo medio diario</h4>
+          <div class="formula green">
+            Consumo = 302.400 hab · 250 l/hab·día · (1 día / 86.400 s) = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">875 l/s = 0.875 m³/s</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num green">2</div>
+        <div class="step-body">
+          <h4>Caudales de aguas negras (retorno = 80%)</h4>
+          <div class="formula green">
+            Q<sub>m,n</sub> = C<sub>R</sub> · Consumo = <span class="val">0.8</span> · <span class="val">875</span> = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">700 l/s = 0.70 m³/s</span>
+            <br><br>
+            Q<sub>p</sub> = C<sub>p</sub> · Q<sub>m,n</sub> = <span class="val">1.4</span> · <span class="val">700</span> = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">980 l/s = 0.98 m³/s</span>
+            <br><br>
+            Q<sub>min</sub> = 0.2 · Q<sub>m,n</sub> = <span class="val">0.2</span> · <span class="val">700</span> = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">140 l/s = 0.14 m³/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTE B: Dimensionamiento ovoide -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Apartado b) — Dimensionamiento del colector ovoide</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num green">1</div>
+        <div class="step-body">
+          <h4>Caudales de cálculo (red unitaria)</h4>
+          <div class="formula green">
+            Q<sub>máx</sub> = Q<sub>p,n</sub> + Q<sub>pluviales</sub> = <span class="val">0.98</span> + <span class="val">1.344</span> = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">2.324 ≈ 2.32 m³/s</span>
+            <br>Q<sub>p,n</sub> = 0.98 m³/s &nbsp;&nbsp; Q<sub>min</sub> = 0.14 m³/s
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num green">2</div>
+        <div class="step-body">
+          <h4>Predimensionamiento gráfico (suponer y/D = 0.8)</h4>
+          <p>Entrando en la gráfica del ovoide con y/H = 0.8:</p>
+          <div class="formula green">
+            Q/Q<sub>ll</sub> = 0.95 → Q<sub>ll</sub> = Q<sub>máx</sub> / 0.95 = 2.32/0.95 = <span class="val">2.442 m³/s</span>
+            <br>V/V<sub>ll</sub> = 1.12
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num green">3</div>
+        <div class="step-body">
+          <h4>Calcular dimensión D del ovoide con Manning</h4>
+          <p>Para ovoide con H = 1.5D → R<sub>H</sub> = 0.193·H = 0.193·1.5D = 0.2895D, S = 0.51·(1.5D)² − 0.51D² = 0.6375D²</p>
+          <div class="formula green">
+            Q<sub>ll</sub> = (1/n) · R<sub>H</sub><sup>2/3</sup> · j<sup>1/2</sup> · S
+            <br><br>
+            2.442 = (1/<span class="val">0.015</span>) · (0.0005)<sup>1/2</sup> · (0.193·1.5·D)<sup>2/3</sup> · 0.51·1.5²·D²
+            <br><br>
+            D técnico = <span class="val">1.517 m</span> → <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">Ovoide comercial 100×150 cm ó 120×180 cm</span>
+          </div>
+          <div class="alert" style="background:rgba(79,217,160,0.07);border:1px solid rgba(79,217,160,0.2);color:var(--accent3);margin-top:0.7rem;font-size:0.82rem;">
+            <span class="alert-icon">→</span>
+            <span>Se elige <strong>ovoide 120×180 cm</strong> (D=1.2 m, H=1.8 m) por ser el comercial inmediatamente superior al valor técnico.</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num green">4</div>
+        <div class="step-body">
+          <h4>Q<sub>ll</sub> y V<sub>ll</sub> para ovoide 120×180 cm</h4>
+          <div class="formula green">
+            R<sub>H</sub> = 0.193·1.8 − 0.193·1.2 = 0.1158 m (aprox 0.193·H con H=1.5D)
+            <br>Usando R<sub>H</sub> = 0.193·D = 0.193·1.5 = 0.2895 m con D=1.2 → 0.347 m
+            <br>S = 0.51·1.8² − 0.51·1.2² = 1.6524 − 0.7344 = 0.918 m²
+            <br><br>
+            Q<sub>ll</sub> = (1/0.015)·(0.0005)<sup>1/2</sup>·(0.2895·1.2)<sup>2/3</sup>·0.51·1.5²·1.2² = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">≈ 2.367 m³/s</span>
+            <br>V<sub>ll</sub> = Q<sub>ll</sub> / S = 2.367 / (0.51·1.5²·1.44) = 2.367 / 1.65 = <span class="result-box" style="background:rgba(79,217,160,0.1);border-color:var(--accent3);color:var(--accent3)">≈ 2.062 m/s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFICACIÓN DE VELOCIDADES -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Verificación de las 3 condiciones de velocidad</div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Se usa la Figura 3 (curvas de funcionamiento del ovoide) para obtener y/H y V/V<sub>ll</sub> a partir de Q/Q<sub>ll</sub>.</p>
+
+    <div class="conditions-grid">
+      <!-- COND 1 -->
+      <div class="cond-card">
+        <div class="cond-label">1ª Condición</div>
+        <div class="cond-desc">Q<sub>máx</sub> → V &lt; 5 m/s</div>
+        <div class="cond-value">2.30 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub> = 2.32/2.367 = 0.98<br>
+          → Gráfica: y/H = 0.84 ; V/V<sub>ll</sub> = 1.12<br>
+          V = 1.12 · 2.062
+        </div>
+        <div class="cond-check">✓ 2.30 &lt; 5 m/s &nbsp; CUMPLE</div>
+      </div>
+      <!-- COND 2 -->
+      <div class="cond-card">
+        <div class="cond-label">2ª Condición</div>
+        <div class="cond-desc">Q<sub>p,n</sub> → V &lt; 3 m/s</div>
+        <div class="cond-value">1.897 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub> = 0.98/2.367 = 0.41<br>
+          → Gráfica: y/H = 0.48 ; V/V<sub>ll</sub> = 0.92<br>
+          V = 0.92 · 2.062
+        </div>
+        <div class="cond-check">✓ 1.90 &lt; 3 m/s &nbsp; CUMPLE</div>
+      </div>
+      <!-- COND 3 -->
+      <div class="cond-card">
+        <div class="cond-label">3ª Condición</div>
+        <div class="cond-desc">Q<sub>min</sub> → V &gt; 0.6 m/s</div>
+        <div class="cond-value">1.279 m/s</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text-dim);margin-bottom:0.4rem">
+          Q/Q<sub>ll</sub> = 0.14/2.367 = 0.059<br>
+          → Gráfica: y/H = 0.23 ; V/V<sub>ll</sub> = 0.62<br>
+          V = 0.62 · 2.062
+        </div>
+        <div class="cond-check">✓ 1.28 &gt; 0.6 m/s &nbsp; CUMPLE</div>
+      </div>
+    </div>
+
+    <div class="alert" style="background:rgba(79,217,160,0.08);border:1px solid rgba(79,217,160,0.2);color:var(--accent3);margin-top:1rem;">
+      <span class="alert-icon">✅</span>
+      <span>Las tres condiciones se cumplen con el <strong>ovoide 120×180 cm</strong>. Solución válida.</span>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-green"></span> Resumen Ejercicio 3</div>
+    <div class="summary-row">
+      <div class="summary-item"><div class="si-label">Q<sub>m,n</sub></div><div class="si-val">0.70 m³/s</div></div>
+      <div class="summary-item"><div class="si-label">Q<sub>p,n</sub></div><div class="si-val">0.98 m³/s</div></div>
+      <div class="summary-item"><div class="si-label">Q<sub>min</sub></div><div class="si-val">0.14 m³/s</div></div>
+      <div class="summary-item"><div class="si-label">Q<sub>máx</sub></div><div class="si-val">2.32 m³/s</div></div>
+      <div class="summary-item"><div class="si-label">Sección elegida</div><div class="si-val" style="color:var(--accent3)">120×180 cm</div></div>
+      <div class="summary-item"><div class="si-label">V<sub>ll</sub></div><div class="si-val">2.062 m/s</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     TABLA THORMANN & FRANKE
+══════════════════════════════════════════════ -->
+<section class="exercise" id="tablatf">
+  <div class="ex-header">
+    <div class="ex-number" style="color:#2a304a">TF</div>
+    <div class="ex-intro">
+      <h2>Tabla de Thormann y Franke</h2>
+      <p>Relaciones adimensionales para tubería circular en lámina libre. Dado y/D → obtener V/V<sub>ll</sub> y Q/Q<sub>ll</sub>. Igualmente dado Q/Q<sub>ll</sub> → interpolamos y/D y V/V<sub>ll</sub>.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-blue"></span> Búsqueda en la tabla</div>
+    <div style="display:flex;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-muted)">Buscar Q/Q<sub>ll</sub>:</label>
+        <input type="number" id="search-q" step="0.001" min="0" max="1" placeholder="p.ej. 0.71"
+          style="background:var(--formula-bg);border:1px solid var(--border);border-radius:6px;padding:0.5rem 0.8rem;color:var(--text);font-family:'DM Mono',monospace;font-size:0.9rem;width:160px;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-muted)">Buscar y/D:</label>
+        <input type="number" id="search-yd" step="0.001" min="0" max="1" placeholder="p.ej. 0.62"
+          style="background:var(--formula-bg);border:1px solid var(--border);border-radius:6px;padding:0.5rem 0.8rem;color:var(--text);font-family:'DM Mono',monospace;font-size:0.9rem;width:160px;">
+      </div>
+      <button onclick="searchTable()" style="margin-top:1.2rem;background:var(--accent);border:none;border-radius:6px;padding:0.55rem 1.2rem;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;font-weight:500;cursor:pointer;">Buscar</button>
+      <button onclick="clearSearch()" style="margin-top:1.2rem;background:transparent;border:1px solid var(--border);border-radius:6px;padding:0.55rem 1.2rem;color:var(--text-muted);font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;cursor:pointer;">Limpiar</button>
+    </div>
+    <div id="search-result" style="display:none;margin-bottom:0.8rem;"></div>
+    <div class="tf-table-wrapper" style="max-height:500px;">
+      <table class="tf-table" id="main-tf-table">
+        <thead>
+          <tr>
+            <th>y/D</th><th>V/V<sub>ll</sub></th><th>Q/Q<sub>ll</sub></th>
+            <th>y/D</th><th>V/V<sub>ll</sub></th><th>Q/Q<sub>ll</sub></th>
+            <th>y/D</th><th>V/V<sub>ll</sub></th><th>Q/Q<sub>ll</sub></th>
+          </tr>
+        </thead>
+        <tbody id="tf-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     GRÁFICAS INTERACTIVAS
+══════════════════════════════════════════════ -->
+<section class="exercise" id="graficas">
+  <div class="ex-header">
+    <div class="ex-number" style="color:#2a304a">∿</div>
+    <div class="ex-intro">
+      <h2>Gráficas interactivas — Curvas de Thormann y Franke</h2>
+      <p>Representación de las curvas para sección circular. Haz clic en la gráfica para leer los valores en ese punto. Pasa el cursor para ver los valores de cada curva.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot dot-blue"></span> Curvas adimensionales — Sección circular</div>
+    <div class="chart-wrapper">
+      <div class="chart-title">Figura 2 · Curvas de Thormann y Franke — Sección circular</div>
+      <canvas id="tfChart" width="900" height="480"></canvas>
+      <div id="chart-tooltip" style="display:none;position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);pointer-events:none;"></div>
+    </div>
+    <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:0.5rem"><div style="width:24px;height:3px;background:#4f9cf9"></div><span style="font-size:0.8rem;color:var(--text-muted)">Caudal Q/Q<sub>ll</sub></span></div>
+      <div style="display:flex;align-items:center;gap:0.5rem"><div style="width:24px;height:3px;background:#f97b4f"></div><span style="font-size:0.8rem;color:var(--text-muted)">Velocidad V/V<sub>ll</sub></span></div>
+      <div style="display:flex;align-items:center;gap:0.5rem"><div style="width:24px;height:3px;background:#f9d94f;opacity:0.7"></div><span style="font-size:0.8rem;color:var(--text-muted)">Área A/A<sub>ll</sub></span></div>
+      <div style="display:flex;align-items:center;gap:0.5rem"><div style="width:24px;height:3px;background:#b96ff9;opacity:0.7"></div><span style="font-size:0.8rem;color:var(--text-muted)">Radio hidráulico R<sub>h</sub>/R<sub>h,ll</sub></span></div>
+    </div>
+
+    <!-- LECTOR INTERACTIVO -->
+    <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-muted);margin-bottom:0.6rem;letter-spacing:0.1em;text-transform:uppercase;">Lector de valores — Introducir y/D:</div>
+      <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+        <input type="range" id="yd-slider" min="0" max="100" value="62" style="width:300px;accent-color:var(--accent)">
+        <span id="yd-display" style="font-family:'DM Mono',monospace;color:var(--accent);font-size:0.95rem;min-width:60px;">y/D = 0.62</span>
+        <div id="reader-output" style="display:flex;gap:1rem;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── NAVIGATION ──
+function show(id, btn) {
+  document.querySelectorAll('.exercise').forEach(e => e.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  if (id === 'graficas') { setTimeout(drawChart, 100); setTimeout(updateReader, 100); }
+  if (id === 'tablatf') buildTable();
+}
+
+// ── THORMANN & FRANKE DATA (complete) ──
+const TF = [
+  [0,0,0],[0.023,0.17,0.001],[0.032,0.21,0.002],[0.038,0.24,0.003],[0.044,0.26,0.004],
+  [0.049,0.28,0.005],[0.053,0.29,0.006],[0.057,0.3,0.007],[0.061,0.32,0.008],[0.065,0.33,0.009],
+  [0.068,0.34,0.01],[0.071,0.35,0.011],[0.074,0.35,0.012],[0.077,0.36,0.013],[0.08,0.37,0.014],
+  [0.083,0.38,0.015],[0.086,0.39,0.016],[0.088,0.39,0.017],[0.091,0.4,0.018],[0.093,0.41,0.019],
+  [0.095,0.41,0.02],[0.098,0.42,0.021],[0.1,0.42,0.022],[0.102,0.43,0.023],[0.104,0.43,0.024],
+  [0.106,0.44,0.025],[0.108,0.44,0.026],[0.11,0.45,0.027],[0.112,0.45,0.028],[0.114,0.46,0.029],
+  [0.116,0.46,0.03],[0.118,0.47,0.031],[0.12,0.47,0.032],[0.122,0.48,0.033],[0.123,0.48,0.034],
+  [0.125,0.48,0.035],[0.127,0.49,0.036],[0.129,0.49,0.037],[0.13,0.5,0.038],[0.132,0.5,0.039],
+  [0.134,0.51,0.041],[0.135,0.51,0.041],[0.137,0.51,0.042],[0.138,0.51,0.043],[0.14,0.52,0.044],
+  [0.141,0.52,0.045],[0.143,0.52,0.046],[0.145,0.53,0.047],[0.146,0.53,0.048],[0.148,0.53,0.049],
+  [0.149,0.54,0.05],[0.151,0.54,0.051],[0.152,0.54,0.052],[0.153,0.55,0.053],[0.155,0.55,0.054],
+  [0.156,0.55,0.055],[0.158,0.55,0.056],[0.159,0.56,0.057],[0.16,0.56,0.058],[0.162,0.56,0.059],
+  [0.163,0.57,0.06],[0.164,0.57,0.061],[0.166,0.57,0.061],[0.167,0.57,0.062],[0.168,0.58,0.063],
+  [0.17,0.58,0.064],[0.171,0.58,0.065],[0.172,0.58,0.066],[0.174,0.59,0.068],[0.175,0.59,0.069],
+  [0.176,0.59,0.07],[0.177,0.59,0.071],[0.179,0.59,0.072],[0.18,0.6,0.073],[0.181,0.6,0.074],
+  [0.182,0.6,0.075],[0.183,0.6,0.076],[0.185,0.61,0.077],[0.186,0.61,0.078],[0.187,0.61,0.079],
+  [0.188,0.61,0.08],[0.189,0.62,0.081],[0.191,0.62,0.082],[0.192,0.62,0.083],[0.193,0.62,0.084],
+  [0.194,0.62,0.085],[0.195,0.63,0.086],[0.196,0.63,0.087],[0.197,0.63,0.088],[0.199,0.63,0.089],
+  [0.2,0.63,0.09],[0.201,0.64,0.091],[0.202,0.64,0.092],[0.203,0.64,0.093],[0.204,0.64,0.094],
+  [0.205,0.64,0.095],[0.206,0.65,0.096],[0.207,0.65,0.097],[0.208,0.65,0.098],[0.21,0.65,0.099],
+  [0.211,0.65,0.1],[0.216,0.66,0.105],[0.221,0.67,0.11],[0.226,0.68,0.115],[0.231,0.69,0.12],
+  [0.236,0.69,0.125],[0.241,0.7,0.13],[0.245,0.71,0.135],[0.25,0.72,0.14],[0.254,0.72,0.145],
+  [0.259,0.73,0.15],[0.263,0.74,0.155],[0.268,0.74,0.16],[0.272,0.75,0.165],[0.276,0.76,0.17],
+  [0.281,0.76,0.175],[0.285,0.77,0.18],[0.289,0.77,0.185],[0.293,0.78,0.19],[0.297,0.78,0.195],
+  [0.301,0.79,0.2],[0.309,0.8,0.21],[0.316,0.81,0.22],[0.324,0.82,0.23],[0.331,0.83,0.24],
+  [0.339,0.84,0.25],[0.346,0.85,0.26],[0.353,0.86,0.27],[0.36,0.86,0.28],[0.367,0.87,0.29],
+  [0.374,0.88,0.3],[0.381,0.89,0.31],[0.387,0.89,0.32],[0.394,0.9,0.33],[0.401,0.91,0.34],
+  [0.407,0.92,0.35],[0.414,0.92,0.36],[0.42,0.93,0.37],[0.426,0.93,0.38],[0.433,0.94,0.39],
+  [0.439,0.95,0.4],[0.445,0.95,0.41],[0.451,0.96,0.42],[0.458,0.96,0.43],[0.464,0.97,0.44],
+  [0.47,0.97,0.45],[0.476,0.98,0.46],[0.482,0.99,0.47],[0.488,0.99,0.48],[0.494,1,0.49],
+  [0.5,1,0.5],[0.506,1,0.51],[0.512,1.01,0.52],[0.519,1.01,0.53],[0.525,1.02,0.54],
+  [0.531,1.02,0.55],[0.537,1.02,0.56],[0.543,1.03,0.57],[0.55,1.03,0.58],[0.556,1.03,0.59],
+  [0.562,1.04,0.6],[0.568,1.04,0.61],[0.576,1.04,0.62],[0.581,1.05,0.63],[0.587,1.05,0.64],
+  [0.594,1.05,0.65],[0.6,1.05,0.66],[0.607,1.06,0.67],[0.613,1.06,0.68],[0.62,1.06,0.69],
+  [0.626,1.06,0.7],[0.633,1.06,0.71],[0.64,1.07,0.72],[0.646,1.07,0.73],[0.653,1.07,0.74],
+  [0.66,1.07,0.75],[0.667,1.07,0.76],[0.675,1.07,0.77],[0.682,1.07,0.78],[0.689,1.07,0.79],
+  [0.697,1.07,0.8],[0.701,1.08,0.805],[0.705,1.08,0.81],[0.709,1.08,0.815],[0.713,1.08,0.82],
+  [0.717,1.08,0.825],[0.721,1.08,0.83],[0.725,1.08,0.835],[0.729,1.07,0.84],[0.734,1.07,0.845],
+  [0.738,1.07,0.85],[0.742,1.07,0.855],[0.747,1.07,0.86],[0.751,1.07,0.865],[0.756,1.07,0.87],
+  [0.761,1.07,0.875],[0.766,1.07,0.88],[0.77,1.07,0.885],[0.775,1.07,0.89],[0.781,1.07,0.895],
+  [0.786,1.07,0.9],[0.791,1.07,0.905],[0.797,1.07,0.91],[0.802,1.06,0.915],[0.808,1.06,0.92],
+  [0.814,1.06,0.925],[0.821,1.06,0.93],[0.827,1.06,0.935],[0.834,1.05,0.94],[0.841,1.05,0.945],
+  [0.849,1.05,0.95],[0.856,1.05,0.955],[0.865,1.04,0.96],[0.874,1.04,0.965],[0.883,1.04,0.97],
+  [0.894,1.03,0.975],[0.905,1.03,0.98],[0.919,1.02,0.985],[0.935,1.02,0.99],[0.955,1.01,0.995],[1,1,1]
+];
+
+// ── BUILD TABLE ──
+let tableBuilt = false;
+function buildTable() {
+  if (tableBuilt) return;
+  tableBuilt = true;
+  const rows = [];
+  // Group in 3 columns
+  const perCol = Math.ceil(TF.length / 3);
+  for (let i = 0; i < perCol; i++) {
+    const a = TF[i] || ['','',''];
+    const b = TF[i + perCol] || ['','',''];
+    const c = TF[i + 2*perCol] || ['','',''];
+    rows.push(`<tr>
+      <td>${a[0]}</td><td>${a[1]}</td><td>${a[2]}</td>
+      <td>${b[0]}</td><td>${b[1]}</td><td>${b[2]}</td>
+      <td>${c[0]!==''?c[0]:''}</td><td>${c[1]!==''?c[1]:''}</td><td>${c[2]!==''?c[2]:''}</td>
+    </tr>`);
+  }
+  document.getElementById('tf-tbody').innerHTML = rows.join('');
+}
+
+function searchTable() {
+  const qv = parseFloat(document.getElementById('search-q').value);
+  const ydv = parseFloat(document.getElementById('search-yd').value);
+  buildTable();
+
+  // remove old highlights
+  document.querySelectorAll('#tf-tbody tr').forEach(r => {
+    r.classList.remove('highlight','highlight2');
+  });
+
+  let found = null;
+  if (!isNaN(qv)) {
+    // find closest by Q/Qll
+    let best = Infinity, bestRow = null;
+    TF.forEach(r => { const d = Math.abs(r[2]-qv); if(d<best){best=d;bestRow=r;} });
+    found = bestRow;
+  } else if (!isNaN(ydv)) {
+    let best = Infinity, bestRow = null;
+    TF.forEach(r => { const d = Math.abs(r[0]-ydv); if(d<best){best=d;bestRow=r;} });
+    found = bestRow;
+  }
+
+  if (found) {
+    const res = document.getElementById('search-result');
+    res.style.display = 'block';
+    res.innerHTML = `<div class="formula" style="margin:0">
+      Resultado interpolado: &nbsp;
+      y/D = <span class="val">${found[0]}</span> &nbsp;|&nbsp;
+      V/V<sub>ll</sub> = <span class="val-blue">${found[1]}</span> &nbsp;|&nbsp;
+      Q/Q<sub>ll</sub> = <span class="result">${found[2]}</span>
+    </div>`;
+
+    // highlight in table
+    const rows = document.querySelectorAll('#tf-tbody tr');
+    const perCol = Math.ceil(TF.length/3);
+    const idx = TF.indexOf(found);
+    let rowIdx = idx < perCol ? idx : (idx < 2*perCol ? idx - perCol : idx - 2*perCol);
+    if (rows[rowIdx]) rows[rowIdx].classList.add('highlight');
+  }
+}
+
+function clearSearch() {
+  document.getElementById('search-q').value='';
+  document.getElementById('search-yd').value='';
+  document.getElementById('search-result').style.display='none';
+  document.querySelectorAll('#tf-tbody tr').forEach(r => r.classList.remove('highlight','highlight2'));
+}
+
+// ── CHART ──
+let chartDrawn = false;
+function drawChart() {
+  if (chartDrawn) return;
+  chartDrawn = true;
+  const canvas = document.getElementById('tfChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const pad = { l: 55, r: 30, t: 20, b: 50 };
+  const cW = W - pad.l - pad.r;
+  const cH = H - pad.t - pad.b;
+
+  function toX(v) { return pad.l + v * cW; } // v in [0,1]
+  function toY(v) { return pad.t + (1.3 - v) / 1.3 * cH; } // v in [0,1.3]
+
+  // background
+  ctx.fillStyle = '#131824';
+  ctx.fillRect(0, 0, W, H);
+
+  // grid
+  ctx.strokeStyle = 'rgba(42,48,74,0.8)';
+  ctx.lineWidth = 1;
+  for (let v = 0; v <= 1.3; v += 0.1) {
+    ctx.beginPath(); ctx.moveTo(pad.l, toY(v)); ctx.lineTo(W-pad.r, toY(v)); ctx.stroke();
+    ctx.fillStyle = '#4a5070';
+    ctx.font = '11px DM Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(1), pad.l - 8, toY(v) + 4);
+  }
+  for (let v = 0; v <= 1; v += 0.1) {
+    ctx.beginPath(); ctx.moveTo(toX(v), pad.t); ctx.lineTo(toX(v), H-pad.b); ctx.stroke();
+    ctx.fillStyle = '#4a5070';
+    ctx.textAlign = 'center';
+    ctx.fillText(v.toFixed(1), toX(v), H - pad.b + 18);
+  }
+
+  // axes labels
+  ctx.fillStyle = '#7a82a0';
+  ctx.font = '12px IBM Plex Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('y/D', W/2, H - 5);
+  ctx.save();
+  ctx.translate(14, H/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('v/vll , Q/Qll , A/All , Rh/Rh,ll', 0, 0);
+  ctx.restore();
+
+  // Helper: draw curve
+  function drawCurve(data, color, lw=2) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.lineJoin = 'round';
+    data.forEach(([x,y],i) => { i===0 ? ctx.moveTo(toX(x),toY(y)) : ctx.lineTo(toX(x),toY(y)); });
+    ctx.stroke();
+  }
+
+  // Caudal curve (Q/Qll vs y/D)
+  const caudal = TF.map(r => [r[0], r[2]]);
+  drawCurve(caudal, '#4f9cf9', 2.5);
+
+  // Velocidad curve (V/Vll vs y/D)
+  const vel = TF.map(r => [r[0], r[1]]);
+  drawCurve(vel, '#f97b4f', 2.5);
+
+  // Area curve: A/All = (geometría circular)
+  function circArea(yd) {
+    const theta = 2 * Math.acos(1 - 2*yd);
+    return (theta - Math.sin(theta)) / (2 * Math.PI);
+  }
+  const area = [];
+  for (let yd = 0; yd <= 1; yd += 0.01) area.push([yd, circArea(yd)]);
+  drawCurve(area, 'rgba(249,217,79,0.7)', 1.5);
+
+  // Rh curve: Rh/Rh,ll  (Rh = A/P)
+  function circRh(yd) {
+    const theta = 2 * Math.acos(1 - 2*yd);
+    return (theta - Math.sin(theta)) / theta; // Rh/Rh,ll (normalized, ×2)
+  }
+  const rh = [];
+  for (let yd = 0.01; yd <= 1; yd += 0.01) rh.push([yd, circRh(yd)]);
+  drawCurve(rh, 'rgba(185,111,249,0.7)', 1.5);
+
+  // Label curves
+  ctx.font = '600 11px IBM Plex Sans';
+  ctx.fillStyle = '#4f9cf9'; ctx.textAlign = 'left';
+  ctx.fillText('caudal', toX(0.72)+4, toY(0.87)-4);
+  ctx.fillStyle = '#f97b4f';
+  ctx.fillText('velocidad', toX(0.5)+4, toY(1.06)-6);
+  ctx.fillStyle = 'rgba(249,217,79,0.9)';
+  ctx.fillText('área', toX(0.82)+4, toY(0.72)+4);
+  ctx.fillStyle = 'rgba(185,111,249,0.9)';
+  ctx.fillText('radio hidr.', toX(0.55)+4, toY(0.57)-4);
+
+  // Border
+  ctx.strokeStyle = '#2a304a';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(pad.l, pad.t, cW, cH);
+}
+
+// ── READER ──
+function getFromTable(yd) {
+  let best = Infinity, bestRow = TF[0];
+  TF.forEach(r => { const d = Math.abs(r[0]-yd); if(d<best){best=d;bestRow=r;} });
+  return bestRow;
+}
+
+function updateReader() {
+  const yd = parseFloat(document.getElementById('yd-slider').value) / 100;
+  document.getElementById('yd-display').textContent = `y/D = ${yd.toFixed(2)}`;
+  const row = getFromTable(yd);
+  document.getElementById('reader-output').innerHTML = `
+    <div class="data-cell" style="min-width:100px;text-align:center">
+      <div class="data-label">V/V<sub>ll</sub></div>
+      <div class="data-value" style="color:var(--accent2)">${row[1]}</div>
+    </div>
+    <div class="data-cell" style="min-width:100px;text-align:center">
+      <div class="data-label">Q/Q<sub>ll</sub></div>
+      <div class="data-value" style="color:var(--accent)">${row[2]}</div>
+    </div>
+  `;
+  // draw marker on chart
+  if (chartDrawn) redrawMarker(yd, row);
+}
+
+function redrawMarker(yd, row) {
+  drawChart();
+  const canvas = document.getElementById('tfChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = { l:55, r:30, t:20, b:50 };
+  const cW = W-pad.l-pad.r, cH = H-pad.t-pad.b;
+  function toX(v){ return pad.l + v*cW; }
+  function toY(v){ return pad.t + (1.3-v)/1.3*cH; }
+
+  // vertical line
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(toX(yd), pad.t); ctx.lineTo(toX(yd), H-pad.b); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // dots
+  [[row[2],'#4f9cf9'],[row[1],'#f97b4f']].forEach(([v,c])=>{
+    ctx.beginPath();
+    ctx.arc(toX(yd), toY(v), 5, 0, Math.PI*2);
+    ctx.fillStyle = c;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+}
+
+document.getElementById('yd-slider').addEventListener('input', updateReader);
+
+// ── INIT ──
+buildTable();
+</script>
+</body>
+</html>
