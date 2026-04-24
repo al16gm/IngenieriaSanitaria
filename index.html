@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimensionamiento de Colectores — Ingeniería Sanitaria</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --azul:    #1a73e8;
+    --verde:   #1e8c45;
+    --naranja: #e8711a;
+    --gris:    #f4f6f9;
+    --borde:   #d0d7e3;
+    --texto:   #1c2a3a;
+    --rojo:    #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #eef1f7; color: var(--texto); }
+
+  /* NAV */
+  nav {
+    background: var(--azul); color: #fff; padding: 0 2rem;
+    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px #0003;
+  }
+  nav .brand { font-weight: 700; font-size: 1.05rem; padding: 1rem 0; white-space: nowrap; }
+  nav a {
+    color: #ffffffcc; text-decoration: none; font-size: .88rem;
+    padding: .75rem .5rem; border-bottom: 3px solid transparent; transition: .2s;
+  }
+  nav a:hover, nav a.active { color: #fff; border-bottom-color: #fff; }
+
+  /* LAYOUT */
+  main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+  section { display: none; }
+  section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: #fff; border-radius: 12px; padding: 1.6rem 2rem;
+    box-shadow: 0 2px 12px #0001; margin-bottom: 1.5rem;
+  }
+  .card h2 { font-size: 1.15rem; color: var(--azul); margin-bottom: .8rem; display: flex; align-items: center; gap: .5rem; }
+  .card h3 { font-size: 1rem; color: var(--texto); margin: 1rem 0 .5rem; }
+
+  /* BADGE EJERCICIO */
+  .ej-header {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--azul); color: #fff; border-radius: 12px 12px 0 0;
+    padding: 1rem 1.6rem; margin-bottom: 0;
+  }
+  .ej-num {
+    font-size: 2rem; font-weight: 900; opacity: .35; line-height: 1;
+  }
+  .ej-title { font-size: 1.1rem; font-weight: 700; }
+  .ej-sub   { font-size: .85rem; opacity: .85; margin-top: .2rem; }
+  .ej-body  {
+    background: #fff; border-radius: 0 0 12px 12px;
+    padding: 1.6rem 2rem; box-shadow: 0 2px 12px #0001; margin-bottom: 2rem;
+  }
+
+  /* GRID DATOS */
+  .datos-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .8rem; margin-bottom: 1rem;
+  }
+  .dato-item {
+    background: var(--gris); border: 1px solid var(--borde);
+    border-radius: 8px; padding: .7rem 1rem;
+  }
+  .dato-item label { font-size: .78rem; color: #666; display: block; margin-bottom: .3rem; }
+  .dato-item input {
+    width: 100%; border: 1px solid var(--borde); border-radius: 6px;
+    padding: .4rem .6rem; font-size: .95rem; background: #fff;
+    transition: border .2s;
+  }
+  .dato-item input:focus { outline: none; border-color: var(--azul); }
+  .dato-item .unidad { font-size: .75rem; color: #888; margin-top: .2rem; }
+
+  /* BOTÓN CALCULAR */
+  .btn-calc {
+    background: var(--azul); color: #fff; border: none; border-radius: 8px;
+    padding: .65rem 1.8rem; font-size: .95rem; cursor: pointer;
+    transition: background .2s; margin-top: .5rem;
+  }
+  .btn-calc:hover { background: #1558b0; }
+
+  /* PASOS */
+  .paso {
+    display: flex; gap: 1rem; margin-bottom: 1.2rem;
+    background: var(--gris); border-radius: 10px; padding: 1rem 1.2rem;
+    border-left: 4px solid var(--azul);
+  }
+  .paso-num {
+    min-width: 2rem; height: 2rem; background: var(--azul); color: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .9rem; flex-shrink: 0;
+  }
+  .paso-body { flex: 1; }
+  .paso-body strong { display: block; margin-bottom: .4rem; font-size: .95rem; }
+  .formula {
+    background: #fff; border: 1px solid var(--borde); border-radius: 6px;
+    padding: .6rem 1rem; font-family: 'Courier New', monospace; font-size: .88rem;
+    margin: .4rem 0; line-height: 1.7;
+  }
+
+  /* TABLA RESUMEN */
+  .resumen-tabla {
+    width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: .5rem;
+  }
+  .resumen-tabla th {
+    background: var(--azul); color: #fff; padding: .5rem .8rem; text-align: left;
+  }
+  .resumen-tabla td { padding: .45rem .8rem; border-bottom: 1px solid var(--borde); }
+  .resumen-tabla tr:last-child td { border-bottom: none; }
+  .resumen-tabla tr:nth-child(even) td { background: var(--gris); }
+
+  /* CONDICIONES */
+  .condiciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .cond-card {
+    border-radius: 10px; padding: 1rem 1.2rem;
+    border: 2px solid var(--borde); background: #fff;
+  }
+  .cond-card.cumple  { border-color: var(--verde);  background: #f0faf4; }
+  .cond-card.falla   { border-color: var(--rojo);   background: #fdf0f0; }
+  .cond-card .cond-titulo { font-weight: 700; font-size: .9rem; margin-bottom: .4rem; }
+  .cond-card .cond-valor  { font-size: 1.4rem; font-weight: 900; }
+  .cond-card .cond-estado { font-size: .85rem; margin-top: .3rem; font-weight: 600; }
+  .cond-card.cumple .cond-estado { color: var(--verde); }
+  .cond-card.falla  .cond-estado { color: var(--rojo);  }
+  .cond-card .cond-detalle { font-size: .78rem; color: #555; margin-top: .4rem; font-family: monospace; line-height: 1.6; }
+
+  /* ALERTA */
+  .alerta {
+    border-radius: 8px; padding: .8rem 1.2rem; font-size: .88rem;
+    margin: .8rem 0; display: flex; gap: .6rem; align-items: flex-start;
+  }
+  .alerta.info    { background: #e8f0fe; border-left: 4px solid var(--azul);   color: #174ea6; }
+  .alerta.warning { background: #fef9e7; border-left: 4px solid #f39c12;       color: #7d6608; }
+  .alerta.success { background: #e9f7ef; border-left: 4px solid var(--verde);  color: #1a5c32; }
+  .alerta.error   { background: #fdecea; border-left: 4px solid var(--rojo);   color: #7b241c; }
+
+  /* GRÁFICAS */
+  .chart-wrap { position: relative; height: 420px; margin: 1rem 0; }
+  .chart-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .5rem; }
+  .chart-legend span {
+    display: flex; align-items: center; gap: .4rem; font-size: .82rem;
+  }
+  .chart-legend .dot {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* LECTOR */
+  .lector {
+    background: var(--gris); border-radius: 10px; padding: 1rem 1.4rem;
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: .8rem;
+  }
+  .lector label { font-size: .85rem; }
+  .lector input[type=range] { width: 200px; }
+  .lector input[type=number] { width: 80px; padding: .3rem .5rem; border: 1px solid var(--borde); border-radius: 6px; }
+  .lector-resultado {
+    display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .8rem;
+  }
+  .lector-resultado .val-box {
+    background: #fff; border: 1px solid var(--borde); border-radius: 8px;
+    padding: .5rem 1rem; text-align: center; min-width: 110px;
+  }
+  .lector-resultado .val-box .vb-label { font-size: .72rem; color: #666; }
+  .lector-resultado .val-box .vb-val   { font-size: 1.2rem; font-weight: 700; color: var(--azul); }
+
+  /* VISUALIZACIÓN LÁMINA */
+  .lamina-wrap { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; margin-top: 1rem; }
+  .lamina-canvas-wrap { flex: 0 0 auto; }
+  .lamina-datos { flex: 1; min-width: 220px; }
+  .lamina-datos table { width: 100%; font-size: .88rem; border-collapse: collapse; }
+  .lamina-datos td { padding: .4rem .6rem; border-bottom: 1px solid var(--borde); }
+  .lamina-datos td:first-child { color: #555; }
+  .lamina-datos td:last-child { font-weight: 700; color: var(--azul); }
+
+  /* TABLA TF */
+  #tabla-tf-container {
+    max-height: 420px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px;
+  }
+  #tabla-tf-container table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  #tabla-tf-container th {
+    background: var(--azul); color: #fff; padding: .45rem .7rem;
+    position: sticky; top: 0; text-align: right;
+  }
+  #tabla-tf-container th:first-child { text-align: left; }
+  #tabla-tf-container td { padding: .38rem .7rem; border-bottom: 1px solid #eee; text-align: right; }
+  #tabla-tf-container td:first-child { text-align: left; }
+  #tabla-tf-container tr.highlight td { background: #fff3cd; font-weight: 700; }
+  .tf-busqueda { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .tf-busqueda input { padding: .4rem .7rem; border: 1px solid var(--borde); border-radius: 6px; width: 120px; }
+  .tf-busqueda button {
+    padding: .4rem 1rem; border: none; border-radius: 6px; cursor: pointer;
+    background: var(--azul); color: #fff; font-size: .85rem;
+  }
+
+  /* SEPARADOR */
+  hr.sep { border: none; border-top: 2px solid var(--borde); margin: 2rem 0; }
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    .ej-body { padding: 1rem; }
+    .chart-wrap { height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">🏗️ Dimensionamiento de Colectores</div>
+  <a href="#" onclick="showSection('s1')" id="nav-s1">Ej. 1 — Circular</a>
+  <a href="#" onclick="showSection('s2')" id="nav-s2">Ej. 2 — Mixto</a>
+  <a href="#" onclick="showSection('s3')" id="nav-s3">Ej. 3 — Ovoide</a>
+  <a href="#" onclick="showSection('stf')" id="nav-stf">📊 Tabla T&F</a>
+  <a href="#" onclick="showSection('sgraf')" id="nav-sgraf">📈 Gráficas</a>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════ EJERCICIO 1 -->
+<section id="s1">
+  <div class="ej-header">
+    <div class="ej-num">01</div>
+    <div>
+      <div class="ej-title">Dimensionamiento — Sección Circular</div>
+      <div class="ej-sub">Dado Ø, pendiente y Manning → calcular calado y velocidad por gráficas y tabla T&F</div>
+    </div>
+  </div>
+  <div class="ej-body">
+
+    <div class="card">
+      <h2>⚙️ Datos del problema</h2>
+      <div class="datos-grid">
+        <div class="dato-item">
+          <label>Diámetro D</label>
+          <input type="number" id="e1_D" value="800" min="100" max="3000" step="50">
+          <div class="unidad">mm</div>
+        </div>
+        <div class="dato-item">
+          <label>Caudal de diseño Q</label>
+          <input type="number" id="e1_Q" value="675" min="1" step="1">
+          <div class="unidad">l/s</div>
+        </div>
+        <div class="dato-item">
+          <label>Pendiente j</label>
+          <input type="number" id="e1_j" value="6" min="0.1" max="100" step="0.1">
+          <div class="unidad">‰</div>
+        </div>
+        <div class="dato-item">
+          <label>Coef. Manning n</label>
+          <input type="number" id="e1_n" value="0.014" min="0.008" max="0.025" step="0.001">
+          <div class="unidad">—</div>
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calcEj1()">🔄 Calcular</button>
+    </div>
+
+    <div class="card" id="e1_resultado" style="display:none">
+      <h2>📐 Resolución paso a paso</h2>
+
+      <h3>Paso previo — Caudal a sección llena Q<sub>ll</sub></h3>
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-body">
+          <strong>Radio hidráulico a sección llena</strong>
+          <div class="formula" id="e1_rh_formula"></div>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-body">
+          <strong>Manning a sección llena → Q<sub>ll</sub></strong>
+          <div class="formula" id="e1_qll_formula"></div>
+        </div>
+      </div>
+
+      <h3>Método a) — Gráficas de Thormann y Franke</h3>
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-body">
+          <strong>Relación Q/Q<sub>ll</sub></strong>
+          <div class="formula" id="e1_rel_formula"></div>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-body">
+          <strong>Lectura gráfica → y/D y V/V<sub>ll</sub></strong>
+          <div class="formula" id="e1_graf_formula"></div>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div class="paso-body">
+          <strong>Calado y velocidad reales (método gráfico)</strong>
+          <div class="formula" id="e1_res_graf"></div>
+        </div>
+      </div>
+
+      <h3>Método b) — Tabla de Thormann y Franke</h3>
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-body">
+          <strong>Interpolación en tabla → y/D y V/V<sub>ll</sub></strong>
+          <div class="formula" id="e1_tabla_formula"></div>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-body">
+          <strong>Calado y velocidad reales (método tabular)</strong>
+          <div class="formula" id="e1_res_tabla"></div>
+        </div>
+      </div>
+
+      <div class="alerta warning" id="e1_aviso">
+        ⚠️ Las pequeñas diferencias entre métodos se deben a la precisión de lectura gráfica. El método tabular es más exacto.
+      </div>
+
+      <h3>Resumen</h3>
+      <table class="resumen-tabla" id="e1_resumen_tabla"></table>
+
+      <h3 style="margin-top:1.2rem">🌊 Visualización de la lámina de agua</h3>
+      <div class="lamina-wrap">
+        <div class="lamina-canvas-wrap">
+          <canvas id="e1_lamina" width="260" height="260"></canvas>
+        </div>
+        <div class="lamina-datos">
+          <table id="e1_lamina_datos"></table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ EJERCICIO 2 -->
+<section id="s2">
+  <div class="ej-header">
+    <div class="ej-num">02</div>
+    <div>
+      <div class="ej-title">Colector de Saneamiento — Año actual y horizonte</div>
+      <div class="ej-sub">Dimensionar colector circular y verificar las 3 condiciones de velocidad</div>
+    </div>
+  </div>
+  <div class="ej-body">
+
+    <div class="card">
+      <h2>⚙️ Datos del problema</h2>
+      <div class="alerta info">ℹ️ Red unitaria (aguas negras + pluviales). Se dimensiona para el horizonte de 25 años y se verifica con el mínimo actual.</div>
+      <h3>Caudales actuales</h3>
+      <div class="datos-grid">
+        <div class="dato-item"><label>Q<sub>med</sub> actual</label><input type="number" id="e2_qmed0" value="0.05" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>min</sub> actual</label><input type="number" id="e2_qmin0" value="0.02" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>p,n</sub> actual</label><input type="number" id="e2_qp0"   value="0.12" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>pl</sub> actual</label><input type="number" id="e2_qpl0"  value="1.00" step="0.01"><div class="unidad">m³/s</div></div>
+      </div>
+      <h3>Caudales horizonte (+25 años)</h3>
+      <div class="datos-grid">
+        <div class="dato-item"><label>Q<sub>med</sub> +25a</label><input type="number" id="e2_qmed25" value="0.15" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>min</sub> +25a</label><input type="number" id="e2_qmin25" value="0.06" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>p,n</sub> +25a</label><input type="number" id="e2_qp25"   value="0.30" step="0.01"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Q<sub>pl</sub> +25a</label><input type="number" id="e2_qpl25"  value="1.50" step="0.01"><div class="unidad">m³/s</div></div>
+      </div>
+      <h3>Parámetros hidráulicos</h3>
+      <div class="datos-grid">
+        <div class="dato-item"><label>Pendiente j</label><input type="number" id="e2_j" value="1" min="0.1" max="50" step="0.1"><div class="unidad">‰</div></div>
+        <div class="dato-item"><label>Coef. Manning n</label><input type="number" id="e2_n" value="0.0137" min="0.008" max="0.025" step="0.0001"><div class="unidad">—</div></div>
+      </div>
+      <button class="btn-calc" onclick="calcEj2()">🔄 Calcular</button>
+    </div>
+
+    <div class="card" id="e2_resultado" style="display:none">
+      <h2>📐 Resolución</h2>
+      <div id="e2_pasos"></div>
+      <h3>Verificación de las 3 condiciones</h3>
+      <div class="condiciones" id="e2_condiciones"></div>
+      <div class="alerta" id="e2_global_alerta"></div>
+      <h3 style="margin-top:1rem">Resumen</h3>
+      <table class="resumen-tabla" id="e2_resumen"></table>
+
+      <h3 style="margin-top:1.2rem">🌊 Visualización de la lámina de agua</h3>
+      <div id="e2_laminas"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ EJERCICIO 3 -->
+<section id="s3">
+  <div class="ej-header">
+    <div class="ej-num">03</div>
+    <div>
+      <div class="ej-title">Dimensionamiento — Sección Ovoide</div>
+      <div class="ej-sub">Calcular caudales de aguas negras y dimensionar colector ovoide unitario</div>
+    </div>
+  </div>
+  <div class="ej-body">
+
+    <div class="card">
+      <h2>⚙️ Datos del problema</h2>
+      <div class="datos-grid">
+        <div class="dato-item"><label>Población</label><input type="number" id="e3_pob" value="302400" step="100"><div class="unidad">hab</div></div>
+        <div class="dato-item"><label>Dotación D<sub>ap</sub></label><input type="number" id="e3_dot" value="250" step="5"><div class="unidad">l/hab·día</div></div>
+        <div class="dato-item"><label>Coef. retorno C<sub>R</sub></label><input type="number" id="e3_cr" value="0.8" min="0.5" max="1" step="0.05"><div class="unidad">—</div></div>
+        <div class="dato-item"><label>Coef. punta C<sub>p</sub></label><input type="number" id="e3_cp" value="1.4" min="1" max="3" step="0.05"><div class="unidad">—</div></div>
+        <div class="dato-item"><label>Q pluviales</label><input type="number" id="e3_qpl" value="1.344" step="0.001"><div class="unidad">m³/s</div></div>
+        <div class="dato-item"><label>Pendiente j</label><input type="number" id="e3_j" value="0.5" min="0.1" max="50" step="0.1"><div class="unidad">‰</div></div>
+        <div class="dato-item"><label>Coef. Manning n</label><input type="number" id="e3_n" value="0.015" min="0.008" max="0.025" step="0.001"><div class="unidad">—</div></div>
+      </div>
+      <button class="btn-calc" onclick="calcEj3()">🔄 Calcular</button>
+    </div>
+
+    <div class="card" id="e3_resultado" style="display:none">
+      <h2>📐 Resolución</h2>
+      <div id="e3_pasos"></div>
+      <h3>Verificación de las 3 condiciones</h3>
+      <div class="condiciones" id="e3_condiciones"></div>
+      <div class="alerta" id="e3_global_alerta"></div>
+      <h3 style="margin-top:1rem">Resumen</h3>
+      <table class="resumen-tabla" id="e3_resumen"></table>
+
+      <h3 style="margin-top:1.2rem">🌊 Visualización de la lámina de agua</h3>
+      <div id="e3_laminas"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ TABLA T&F -->
+<section id="stf">
+  <div class="ej-header" style="background:var(--verde)">
+    <div class="ej-num">TF</div>
+    <div>
+      <div class="ej-title">Tabla de Thormann y Franke</div>
+      <div class="ej-sub">Relaciones adimensionales para tubería circular en lámina libre</div>
+    </div>
+  </div>
+  <div class="ej-body">
+    <div class="card">
+      <div class="tf-busqueda">
+        <label>Buscar Q/Q<sub>ll</sub>: <input type="number" id="tf_q" placeholder="ej. 0.71" step="0.01" min="0" max="1.08"></label>
+        <label>Buscar y/D: <input type="number" id="tf_y" placeholder="ej. 0.62" step="0.01" min="0" max="1"></label>
+        <button onclick="buscarTF()">🔍 Buscar</button>
+        <button onclick="limpiarTF()" style="background:#888">✖ Limpiar</button>
+      </div>
+      <div id="tf_resultado_busqueda"></div>
+      <div id="tabla-tf-container"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ GRÁFICAS -->
+<section id="sgraf">
+  <div class="ej-header" style="background:var(--naranja)">
+    <div class="ej-num">∿</div>
+    <div>
+      <div class="ej-title">Gráficas Interactivas</div>
+      <div class="ej-sub">Curvas adimensionales para sección circular y ovoide</div>
+    </div>
+  </div>
+  <div class="ej-body">
+
+    <div class="card">
+      <h2>📊 Curvas adimensionales — Sección Circular (Thormann & Franke)</h2>
+      <div class="chart-wrap"><canvas id="chart_circular"></canvas></div>
+      <div class="chart-legend">
+        <span><span class="dot" style="background:#1a73e8"></span>Caudal Q/Q<sub>ll</sub></span>
+        <span><span class="dot" style="background:#e8711a"></span>Velocidad V/V<sub>ll</sub></span>
+        <span><span class="dot" style="background:#1e8c45"></span>Área A/A<sub>ll</sub></span>
+        <span><span class="dot" style="background:#9b59b6"></span>Radio hidráulico R<sub>h</sub>/R<sub>h,ll</sub></span>
+      </div>
+      <div class="lector">
+        <label>Lector — y/D: <input type="range" id="lect_circ_slider" min="0" max="1" step="0.005" value="0.62" oninput="updateLectorCirc()"></label>
+        <input type="number" id="lect_circ_num" value="0.62" min="0" max="1" step="0.005" oninput="updateLectorCirc()">
+        <div class="lector-resultado" id="lect_circ_res"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Curvas adimensionales — Sección Ovoide (H = 1.5·D)</h2>
+      <div class="chart-wrap"><canvas id="chart_ovoide"></canvas></div>
+      <div class="chart-legend">
+        <span><span class="dot" style="background:#1a73e8"></span>Caudal Q/Q<sub>ll</sub></span>
+        <span><span class="dot" style="background:#e8711a"></span>Velocidad V/V<sub>ll</sub></span>
+      </div>
+      <div class="lector">
+        <label>Lector — y/H: <input type="range" id="lect_ov_slider" min="0" max="1" step="0.005" value="0.5" oninput="updateLectorOv()"></label>
+        <input type="number" id="lect_ov_num" value="0.5" min="0" max="1" step="0.005" oninput="updateLectorOv()">
+        <div class="lector-resultado" id="lect_ov_res"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+}
+showSection('s1');
+
+// ═══════════════════════════════════════════════════════════════════════
+// TABLA DE THORMANN Y FRANKE — datos completos
+// ═══════════════════════════════════════════════════════════════════════
+const TF = [];
+for (let i = 0; i <= 200; i++) {
+  const yD = i / 200;
+  const th = Math.acos(1 - 2 * yD); // ángulo mitad
+  const A  = (th - Math.sin(2*th)/2) / Math.PI;  // A/All
+  const P  = th / Math.PI;                         // P/Pll
+  const Rh = (P > 0) ? A / P : 0;                 // Rh/Rh,ll  (Rh,ll = D/4)
+  const V  = (Rh > 0) ? Math.pow(Rh, 2/3) : 0;   // V/Vll
+  const Q  = A * V;                                // Q/Qll
+  TF.push({ yD: +yD.toFixed(4), A: +A.toFixed(4), Rh: +Rh.toFixed(4), V: +V.toFixed(4), Q: +Q.toFixed(4) });
+}
+
+function interpTF(key, val) {
+  // Interpola en la tabla TF dado un valor de 'key' (yD o Q) → devuelve fila interpolada
+  const arr = TF.map(r => r[key]);
+  let lo = 0, hi = TF.length - 1;
+  // Buscar bracket
+  for (let i = 0; i < TF.length - 1; i++) {
+    if (arr[i] <= val && arr[i+1] >= val) { lo = i; hi = i+1; break; }
+  }
+  const t = (arr[hi] - arr[lo]) > 0 ? (val - arr[lo]) / (arr[hi] - arr[lo]) : 0;
+  const lerp = (a, b) => a + t * (b - a);
+  return {
+    yD: lerp(TF[lo].yD, TF[hi].yD),
+    A:  lerp(TF[lo].A,  TF[hi].A),
+    Rh: lerp(TF[lo].Rh, TF[hi].Rh),
+    V:  lerp(TF[lo].V,  TF[hi].V),
+    Q:  lerp(TF[lo].Q,  TF[hi].Q),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATOS OVOIDE (digitalizados de Figura 3)
+// ═══════════════════════════════════════════════════════════════════════
+const OV_Q = [
+  [0.00, 0.000],[0.05, 0.005],[0.10, 0.020],[0.15, 0.045],[0.20, 0.080],
+  [0.25, 0.120],[0.30, 0.170],[0.35, 0.225],[0.40, 0.290],[0.45, 0.360],
+  [0.48, 0.410],[0.50, 0.440],[0.55, 0.510],[0.60, 0.590],[0.65, 0.670],
+  [0.70, 0.750],[0.75, 0.820],[0.80, 0.880],[0.84, 0.940],[0.88, 0.980],
+  [0.90, 1.000],[0.92, 1.030],[0.94, 1.050],[0.95, 1.060],[0.96, 1.055],
+  [0.97, 1.040],[0.98, 1.020],[0.99, 1.005],[1.00, 1.000]
+];
+const OV_V = [
+  [0.00, 0.000],[0.05, 0.220],[0.10, 0.350],[0.15, 0.470],[0.20, 0.560],
+  [0.23, 0.620],[0.25, 0.650],[0.30, 0.720],[0.35, 0.780],[0.40, 0.840],
+  [0.45, 0.890],[0.48, 0.920],[0.50, 0.940],[0.55, 0.970],[0.60, 1.000],
+  [0.65, 1.030],[0.70, 1.060],[0.75, 1.085],[0.80, 1.100],[0.84, 1.120],
+  [0.88, 1.120],[0.90, 1.115],[0.92, 1.105],[0.94, 1.090],[0.95, 1.080],
+  [0.97, 1.050],[0.98, 1.030],[0.99, 1.010],[1.00, 1.000]
+];
+
+function interpOv(data, x) {
+  if (x <= data[0][0]) return data[0][1];
+  if (x >= data[data.length-1][0]) return data[data.length-1][1];
+  for (let i = 0; i < data.length-1; i++) {
+    if (data[i][0] <= x && data[i+1][0] >= x) {
+      const t = (x - data[i][0]) / (data[i+1][0] - data[i][0]);
+      return data[i][1] + t * (data[i+1][1] - data[i][1]);
+    }
+  }
+  return 0;
+}
+
+// Inversa: dado Q/Qll → y/H (busca en OV_Q)
+function ovQtoYH(qRel) {
+  // Puede haber dos soluciones (rama ascendente y descendente). Tomamos la primera (rama ascendente hasta y/H=0.95)
+  const data = OV_Q;
+  // Buscar en rama ascendente (hasta índice del máximo)
+  let maxIdx = 0;
+  for (let i = 1; i < data.length; i++) if (data[i][1] > data[maxIdx][1]) maxIdx = i;
+  // Buscar en rama ascendente
+  for (let i = 0; i < maxIdx; i++) {
+    if (data[i][1] <= qRel && data[i+1][1] >= qRel) {
+      const t = (qRel - data[i][1]) / (data[i+1][1] - data[i][1]);
+      return data[i][0] + t * (data[i+1][0] - data[i][0]);
+    }
+  }
+  // Si no encontrado en ascendente, buscar en descendente
+  for (let i = maxIdx; i < data.length-1; i++) {
+    if (data[i][1] >= qRel && data[i+1][1] <= qRel) {
+      const t = (qRel - data[i][1]) / (data[i+1][1] - data[i][1]);
+      return data[i][0] + t * (data[i+1][0] - data[i][0]);
+    }
+  }
+  return 1.0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SECCIONES COMERCIALES OVOIDE
+// ═══════════════════════════════════════════════════════════════════════
+const OVOIDES_COM = [
+  {D:0.60, H:0.90}, {D:0.90, H:1.35}, {D:1.00, H:1.50},
+  {D:1.20, H:1.80}, {D:1.40, H:2.10}, {D:1.60, H:2.40},
+  {D:1.80, H:2.70}, {D:2.00, H:3.00}
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// MANNING CIRCULAR — cálculo Qll, Vll
+// ═══════════════════════════════════════════════════════════════════════
+function manningCirc(D, j, n) {
+  const Rh  = D / 4;
+  const S   = Math.PI * D * D / 4;
+  const Qll = (1/n) * Math.pow(Rh, 2/3) * Math.sqrt(j) * S;
+  const Vll = Qll / S;
+  return { Rh, S, Qll, Vll };
+}
+
+// Manning ovoide a sección llena
+function manningOv(D, j, n) {
+  const H   = 1.5 * D;
+  const Rh  = 0.2895 * D;          // 0.193 * 1.5 * D
+  const S   = 0.51 * H*H - 0.51 * D*D;  // = 0.6375 D²
+  const Qll = (1/n) * Math.pow(Rh, 2/3) * Math.sqrt(j) * S;
+  const Vll = Qll / S;
+  return { H, Rh, S, Qll, Vll };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EJERCICIO 1
+// ═══════════════════════════════════════════════════════════════════════
+function calcEj1() {
+  const D = +document.getElementById('e1_D').value / 1000;
+  const Q = +document.getElementById('e1_Q').value / 1000;
+  const j = +document.getElementById('e1_j').value / 1000;
+  const n = +document.getElementById('e1_n').value;
+
+  const { Rh, S, Qll, Vll } = manningCirc(D, j, n);
+
+  // Relación
+  const qRel = Q / Qll;
+
+  // Método gráfico (interpolación en TF)
+  const rowG = interpTF('Q', qRel);
+  const yG   = rowG.yD * D;
+  const VG   = rowG.V  * Vll;
+
+  // Método tabular (misma interpolación, pero presentamos como tabla)
+  const rowT = interpTF('Q', qRel);
+  const yT   = rowT.yD * D;
+  const VT   = rowT.V  * Vll;
+
+  // Mostrar
+  document.getElementById('e1_rh_formula').innerHTML =
+    `RH = D/4 = ${D.toFixed(3)}/4 = <b>${Rh.toFixed(4)} m</b>`;
+
+  document.getElementById('e1_qll_formula').innerHTML =
+    `S = π·(${D.toFixed(3)}/2)² = ${S.toFixed(4)} m²\n` +
+    `Qll = (1/${n}) · ${Rh.toFixed(4)}^(2/3) · ${j.toFixed(5)}^(1/2) · ${S.toFixed(4)}\n` +
+    `Qll = <b>${Qll.toFixed(4)} m³/s = ${(Qll*1000).toFixed(1)} l/s</b>`;
+
+  document.getElementById('e1_rel_formula').innerHTML =
+    `Q/Qll = ${(Q*1000).toFixed(1)} / ${(Qll*1000).toFixed(1)} = <b>${qRel.toFixed(4)}</b>`;
+
+  document.getElementById('e1_graf_formula').innerHTML =
+    `Q/Qll = ${qRel.toFixed(3)} → y/D = ${rowG.yD.toFixed(3)} ; V/Vll = ${rowG.V.toFixed(3)}`;
+
+  document.getElementById('e1_res_graf').innerHTML =
+    `y = ${rowG.yD.toFixed(3)} · ${(D*1000).toFixed(0)} = <b>${(yG*1000).toFixed(0)} mm</b>\n` +
+    `Vll = ${Vll.toFixed(4)} m/s\n` +
+    `V = ${rowG.V.toFixed(3)} · ${Vll.toFixed(4)} = <b>${VG.toFixed(3)} m/s</b>`;
+
+  document.getElementById('e1_tabla_formula').innerHTML =
+    `Interpolando en tabla T&F para Q/Qll = ${qRel.toFixed(4)}:\n` +
+    `y/D = ${rowT.yD.toFixed(4)} ; V/Vll = ${rowT.V.toFixed(4)}`;
+
+  document.getElementById('e1_res_tabla').innerHTML =
+    `y = ${rowT.yD.toFixed(4)} · ${(D*1000).toFixed(0)} = <b>${(yT*1000).toFixed(1)} mm</b>\n` +
+    `V = ${rowT.V.toFixed(4)} · ${Vll.toFixed(4)} = <b>${VT.toFixed(3)} m/s</b>`;
+
+  document.getElementById('e1_resumen_tabla').innerHTML = `
+    <tr><th>Parámetro</th><th>Gráfico</th><th>Tabular</th></tr>
+    <tr><td>Q/Qll</td><td colspan="2">${qRel.toFixed(4)}</td></tr>
+    <tr><td>y/D</td><td>${rowG.yD.toFixed(3)}</td><td>${rowT.yD.toFixed(4)}</td></tr>
+    <tr><td>Calado y</td><td>${(yG*1000).toFixed(0)} mm</td><td>${(yT*1000).toFixed(1)} mm</td></tr>
+    <tr><td>V/Vll</td><td>${rowG.V.toFixed(3)}</td><td>${rowT.V.toFixed(4)}</td></tr>
+    <tr><td>Velocidad V</td><td>${VG.toFixed(3)} m/s</td><td>${VT.toFixed(3)} m/s</td></tr>
+    <tr><td>Qll</td><td colspan="2">${Qll.toFixed(4)} m³/s</td></tr>
+    <tr><td>Vll</td><td colspan="2">${Vll.toFixed(4)} m/s</td></tr>
+  `;
+
+  document.getElementById('e1_resultado').style.display = 'block';
+
+  // Lámina
+  dibujarLaminaCirc('e1_lamina', D, rowT.yD);
+  document.getElementById('e1_lamina_datos').innerHTML = `
+    <tr><td>Diámetro D</td><td>${(D*1000).toFixed(0)} mm</td></tr>
+    <tr><td>Calado y</td><td>${(yT*1000).toFixed(1)} mm</td></tr>
+    <tr><td>y/D</td><td>${rowT.yD.toFixed(4)}</td></tr>
+    <tr><td>Área mojada A</td><td>${(rowT.A * S).toFixed(4)} m²</td></tr>
+    <tr><td>A/All</td><td>${rowT.A.toFixed(4)}</td></tr>
+    <tr><td>Rh/Rh,ll</td><td>${rowT.Rh.toFixed(4)}</td></tr>
+    <tr><td>Radio hidráulico Rh</td><td>${(rowT.Rh * Rh).toFixed(4)} m</td></tr>
+    <tr><td>Velocidad V</td><td>${VT.toFixed(3)} m/s</td></tr>
+    <tr><td>Caudal Q</td><td>${(Q*1000).toFixed(1)} l/s</td></tr>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EJERCICIO 2
+// ═══════════════════════════════════════════════════════════════════════
+function calcEj2() {
+  const qmed0  = +document.getElementById('e2_qmed0').value;
+  const qmin0  = +document.getElementById('e2_qmin0').value;
+  const qp0    = +document.getElementById('e2_qp0').value;
+  const qpl0   = +document.getElementById('e2_qpl0').value;
+  const qmed25 = +document.getElementById('e2_qmed25').value;
+  const qmin25 = +document.getElementById('e2_qmin25').value;
+  const qp25   = +document.getElementById('e2_qp25').value;
+  const qpl25  = +document.getElementById('e2_qpl25').value;
+  const j      = +document.getElementById('e2_j').value / 1000;
+  const n      = +document.getElementById('e2_n').value;
+
+  const Qmax = qp25 + qpl25;
+  const Qp   = qp25;
+  const Qmin = qmin0;  // peor caso: año actual
+
+  // Calcular D técnico
+  // Q = (1/n)*(D/4)^(2/3)*sqrt(j)*(pi*D^2/4)
+  // Q = (1/n)*sqrt(j)*pi/4 * (1/4)^(2/3) * D^(8/3)
+  const K = (1/n) * Math.sqrt(j) * Math.PI/4 * Math.pow(1/4, 2/3);
+  const Dtec = Math.pow(Qmax / K, 3/8);
+
+  // Diámetros comerciales (mm)
+  const dCom = [200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1400,1600,1800,2000];
+  const Dcom = dCom.find(d => d/1000 >= Dtec) / 1000 || dCom[dCom.length-1]/1000;
+
+  const { Rh, S, Qll, Vll } = manningCirc(Dcom, j, n);
+
+  // Condiciones
+  const conds = [
+    { label: '1ª — Qmáx → V < 5 m/s (erosión)',  Q: Qmax, limite: 5,   tipo: 'max', desc: 'Erosión de la tubería' },
+    { label: '2ª — Qp,n → V < 3 m/s (ag. negras)', Q: Qp,   limite: 3,   tipo: 'max', desc: 'Aguas negras punta' },
+    { label: '3ª — Qmin → V > 0.6 m/s (arrastre)', Q: Qmin, limite: 0.6, tipo: 'min', desc: 'Arrastre de sólidos' },
+  ];
+
+  const condResults = conds.map(c => {
+    const qRel = c.Q / Qll;
+    const row  = interpTF('Q', Math.min(qRel, 1.079));
+    const V    = row.V * Vll;
+    const cumple = c.tipo === 'max' ? V < c.limite : V > c.limite;
+    return { ...c, qRel, row, V, cumple };
+  });
+
+  // HTML pasos
+  let pasosHTML = `
+    <div class="paso"><div class="paso-num">1</div><div class="paso-body">
+      <strong>Caudales de cálculo</strong>
+      <div class="formula">Qmáx = Qp,n(+25a) + Qpl(+25a) = ${qp25} + ${qpl25} = <b>${Qmax.toFixed(3)} m³/s</b>
+Qp,n = ${Qp} m³/s  (aguas negras punta horizonte)
+Qmin = ${Qmin} m³/s  (mínimo actual → peor caso arrastre)</div>
+    </div></div>
+    <div class="paso"><div class="paso-num">2</div><div class="paso-body">
+      <strong>Diámetro técnico (Manning a sección llena)</strong>
+      <div class="formula">Q = (1/n)·(D/4)^(2/3)·j^(1/2)·(π·D²/4)
+${Qmax.toFixed(3)} = ${K.toFixed(4)} · D^(8/3)
+D_técnico = (${Qmax.toFixed(3)} / ${K.toFixed(4)})^(3/8) = <b>${(Dtec*100).toFixed(1)} cm = ${(Dtec*1000).toFixed(0)} mm</b>
+→ Ø comercial elegido: <b>${(Dcom*1000).toFixed(0)} mm</b></div>
+    </div></div>
+    <div class="paso"><div class="paso-num">3</div><div class="paso-body">
+      <strong>Qll y Vll para Ø = ${(Dcom*1000).toFixed(0)} mm</strong>
+      <div class="formula">Qll = <b>${Qll.toFixed(4)} m³/s</b>
+Vll = Qll / S = ${Qll.toFixed(4)} / ${S.toFixed(4)} = <b>${Vll.toFixed(4)} m/s</b></div>
+    </div></div>
+  `;
+  document.getElementById('e2_pasos').innerHTML = pasosHTML;
+
+  // Condiciones HTML
+  let condsHTML = '';
+  condResults.forEach(c => {
+    condsHTML += `
+      <div class="cond-card ${c.cumple ? 'cumple' : 'falla'}">
+        <div class="cond-titulo">${c.label}</div>
+        <div class="cond-valor">${c.V.toFixed(3)} m/s</div>
+        <div class="cond-estado">${c.cumple ? '✅ CUMPLE' : '❌ NO CUMPLE'}</div>
+        <div class="cond-detalle">Q = ${c.Q.toFixed(4)} m³/s
+Q/Qll = ${c.qRel.toFixed(4)}
+y/D = ${c.row.yD.toFixed(3)}
+V/Vll = ${c.row.V.toFixed(3)}
+V = ${c.row.V.toFixed(3)} × ${Vll.toFixed(3)} = ${c.V.toFixed(3)} m/s
+Límite: ${c.tipo === 'max' ? '<' : '>'} ${c.limite} m/s</div>
+      </div>`;
+  });
+  document.getElementById('e2_condiciones').innerHTML = condsHTML;
+
+  const todosCumplen = condResults.every(c => c.cumple);
+  const alertaEl = document.getElementById('e2_global_alerta');
+  alertaEl.className = 'alerta ' + (todosCumplen ? 'success' : 'error');
+  alertaEl.innerHTML = todosCumplen
+    ? `✅ Las tres condiciones se cumplen con Ø = ${(Dcom*1000).toFixed(0)} mm. Solución válida.`
+    : `❌ Alguna condición NO se cumple con Ø = ${(Dcom*1000).toFixed(0)} mm. Revisar diámetro o pendiente.`;
+
+  document.getElementById('e2_resumen').innerHTML = `
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>D técnico</td><td>${(Dtec*1000).toFixed(0)} mm</td></tr>
+    <tr><td>Ø comercial elegido</td><td>${(Dcom*1000).toFixed(0)} mm</td></tr>
+    <tr><td>Qll</td><td>${Qll.toFixed(4)} m³/s</td></tr>
+    <tr><td>Vll</td><td>${Vll.toFixed(4)} m/s</td></tr>
+    ${condResults.map(c => `<tr><td>${c.label.split('—')[0].trim()}</td><td>${c.V.toFixed(3)} m/s ${c.cumple ? '✅' : '❌'}</td></tr>`).join('')}
+  `;
+
+  document.getElementById('e2_resultado').style.display = 'block';
+
+  // Láminas de agua para las 3 condiciones
+  let laminasHTML = '<div style="display:flex;flex-wrap:wrap;gap:2rem;margin-top:1rem;">';
+  condResults.forEach((c, i) => {
+    laminasHTML += `
+      <div>
+        <div style="font-size:.82rem;font-weight:700;margin-bottom:.4rem;color:var(--azul)">${c.label.split('—')[1]?.trim() || c.label}</div>
+        <canvas id="e2_lam_${i}" width="200" height="200"></canvas>
+        <div style="font-size:.78rem;margin-top:.3rem;text-align:center">y = ${(c.row.yD * Dcom * 1000).toFixed(0)} mm | V = ${c.V.toFixed(2)} m/s</div>
+      </div>`;
+  });
+  laminasHTML += '</div>';
+  document.getElementById('e2_laminas').innerHTML = laminasHTML;
+  condResults.forEach((c, i) => {
+    setTimeout(() => dibujarLaminaCirc(`e2_lam_${i}`, Dcom, c.row.yD, 200), 50);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EJERCICIO 3
+// ═══════════════════════════════════════════════════════════════════════
+function calcEj3() {
+  const pob  = +document.getElementById('e3_pob').value;
+  const dot  = +document.getElementById('e3_dot').value;
+  const CR   = +document.getElementById('e3_cr').value;
+  const Cp   = +document.getElementById('e3_cp').value;
+  const Qpl  = +document.getElementById('e3_qpl').value;
+  const j    = +document.getElementById('e3_j').value / 1000;
+  const n    = +document.getElementById('e3_n').value;
+
+  // Caudales
+  const consumo = pob * dot / 86400;  // m³/s
+  const Qmn     = CR * consumo;
+  const Qpn     = Cp * Qmn;
+  const Qmin    = 0.2 * Qmn;
+  const Qmax    = Qpn + Qpl;
+
+  // Predimensionamiento: suponer y/H = 0.8 → Q/Qll ≈ 0.88
+  const qRelPre = 0.88;
+  const QllNec  = Qmax / qRelPre;
+
+  // Calcular D técnico para ovoide
+  // Qll = (1/n) * (0.2895*D)^(2/3) * sqrt(j) * 0.6375*D^2
+  // Qll = (1/n)*sqrt(j)*0.6375 * 0.2895^(2/3) * D^(2/3+2)
+  const K3 = (1/n) * Math.sqrt(j) * 0.6375 * Math.pow(0.2895, 2/3);
+  const Dtec = Math.pow(QllNec / K3, 3/8);
+
+  // Elegir comercial
+  const ovCom = OVOIDES_COM.find(o => o.D >= Dtec) || OVOIDES_COM[OVOIDES_COM.length-1];
+  const D = ovCom.D, H = ovCom.H;
+
+  const { Rh, S, Qll, Vll } = manningOv(D, j, n);
+
+  // Condiciones
+  const conds3 = [
+    { label: '1ª — Qmáx → V < 5 m/s (erosión)',    Q: Qmax, limite: 5,   tipo: 'max' },
+    { label: '2ª — Qp,n → V < 3 m/s (ag. negras)',  Q: Qpn,  limite: 3,   tipo: 'max' },
+    { label: '3ª — Qmin → V > 0.6 m/s (arrastre)',  Q: Qmin, limite: 0.6, tipo: 'min' },
+  ];
+
+  const condResults3 = conds3.map(c => {
+    const qRel = c.Q / Qll;
+    const yH   = ovQtoYH(Math.min(qRel, 1.06));
+    const vRel = interpOv(OV_V, yH);
+    const V    = vRel * Vll;
+    const cumple = c.tipo === 'max' ? V < c.limite : V > c.limite;
+    return { ...c, qRel, yH, vRel, V, cumple };
+  });
+
+  // Pasos HTML
+  let pasosHTML = `
+    <div class="paso"><div class="paso-num">1</div><div class="paso-body">
+      <strong>Caudales de aguas negras</strong>
+      <div class="formula">Consumo = ${pob.toLocaleString()} × ${dot} / 86400 = <b>${(consumo*1000).toFixed(1)} l/s = ${consumo.toFixed(4)} m³/s</b>
+Qm,n = ${CR} × ${consumo.toFixed(4)} = <b>${Qmn.toFixed(4)} m³/s</b>
+Qp,n = ${Cp} × ${Qmn.toFixed(4)} = <b>${Qpn.toFixed(4)} m³/s</b>
+Qmin = 0.2 × ${Qmn.toFixed(4)} = <b>${Qmin.toFixed(4)} m³/s</b></div>
+    </div></div>
+    <div class="paso"><div class="paso-num">2</div><div class="paso-body">
+      <strong>Caudal máximo de cálculo (red unitaria)</strong>
+      <div class="formula">Qmáx = Qp,n + Qpl = ${Qpn.toFixed(4)} + ${Qpl} = <b>${Qmax.toFixed(4)} m³/s</b></div>
+    </div></div>
+    <div class="paso"><div class="paso-num">3</div><div class="paso-body">
+      <strong>Predimensionamiento (suponer y/H = 0.8 → Q/Qll ≈ 0.88)</strong>
+      <div class="formula">Qll,necesario = ${Qmax.toFixed(4)} / ${qRelPre} = <b>${QllNec.toFixed(4)} m³/s</b>
+D_técnico = ${(Dtec*100).toFixed(1)} cm
+→ Ovoide comercial elegido: <b>${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm</b></div>
+    </div></div>
+    <div class="paso"><div class="paso-num">4</div><div class="paso-body">
+      <strong>Qll y Vll para ovoide ${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm</strong>
+      <div class="formula">RH = 0.2895 × ${D} = ${Rh.toFixed(4)} m
+S = 0.51×${H}² − 0.51×${D}² = ${S.toFixed(4)} m²
+Qll = <b>${Qll.toFixed(4)} m³/s</b>
+Vll = ${Qll.toFixed(4)} / ${S.toFixed(4)} = <b>${Vll.toFixed(4)} m/s</b></div>
+    </div></div>
+  `;
+  document.getElementById('e3_pasos').innerHTML = pasosHTML;
+
+  // Condiciones
+  let condsHTML = '';
+  condResults3.forEach(c => {
+    condsHTML += `
+      <div class="cond-card ${c.cumple ? 'cumple' : 'falla'}">
+        <div class="cond-titulo">${c.label}</div>
+        <div class="cond-valor">${c.V.toFixed(3)} m/s</div>
+        <div class="cond-estado">${c.cumple ? '✅ CUMPLE' : '❌ NO CUMPLE'}</div>
+        <div class="cond-detalle">Q = ${c.Q.toFixed(4)} m³/s
+Q/Qll = ${c.qRel.toFixed(4)}
+y/H = ${c.yH.toFixed(3)}  →  y = ${(c.yH * H * 100).toFixed(1)} cm
+V/Vll = ${c.vRel.toFixed(3)}
+V = ${c.vRel.toFixed(3)} × ${Vll.toFixed(3)} = ${c.V.toFixed(3)} m/s
+Límite: ${c.tipo === 'max' ? '<' : '>'} ${c.limite} m/s</div>
+      </div>`;
+  });
+  document.getElementById('e3_condiciones').innerHTML = condsHTML;
+
+  const todosCumplen3 = condResults3.every(c => c.cumple);
+  const alertaEl3 = document.getElementById('e3_global_alerta');
+  alertaEl3.className = 'alerta ' + (todosCumplen3 ? 'success' : 'error');
+  alertaEl3.innerHTML = todosCumplen3
+    ? `✅ Las tres condiciones se cumplen con ovoide ${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm. Solución válida.`
+    : `❌ Alguna condición NO se cumple. Revisar sección o pendiente.`;
+
+  document.getElementById('e3_resumen').innerHTML = `
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Qm,n</td><td>${Qmn.toFixed(4)} m³/s</td></tr>
+    <tr><td>Qp,n</td><td>${Qpn.toFixed(4)} m³/s</td></tr>
+    <tr><td>Qmin</td><td>${Qmin.toFixed(4)} m³/s</td></tr>
+    <tr><td>Qmáx</td><td>${Qmax.toFixed(4)} m³/s</td></tr>
+    <tr><td>D técnico</td><td>${(Dtec*100).toFixed(1)} cm</td></tr>
+    <tr><td>Sección elegida</td><td>${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm</td></tr>
+    <tr><td>Qll</td><td>${Qll.toFixed(4)} m³/s</td></tr>
+    <tr><td>Vll</td><td>${Vll.toFixed(4)} m/s</td></tr>
+    ${condResults3.map(c => `<tr><td>${c.label.split('—')[0].trim()}</td><td>${c.V.toFixed(3)} m/s ${c.cumple ? '✅' : '❌'}</td></tr>`).join('')}
+  `;
+
+  document.getElementById('e3_resultado').style.display = 'block';
+
+  // Láminas ovoide
+  let laminasHTML = '<div style="display:flex;flex-wrap:wrap;gap:2rem;margin-top:1rem;">';
+  condResults3.forEach((c, i) => {
+    laminasHTML += `
+      <div>
+        <div style="font-size:.82rem;font-weight:700;margin-bottom:.4rem;color:var(--azul)">${c.label.split('—')[1]?.trim() || c.label}</div>
+        <canvas id="e3_lam_${i}" width="200" height="260"></canvas>
+        <div style="font-size:.78rem;margin-top:.3rem;text-align:center">y = ${(c.yH * H * 100).toFixed(1)} cm | V = ${c.V.toFixed(2)} m/s</div>
+      </div>`;
+  });
+  laminasHTML += '</div>';
+  document.getElementById('e3_laminas').innerHTML = laminasHTML;
+  condResults3.forEach((c, i) => {
+    setTimeout(() => dibujarLaminaOv(`e3_lam_${i}`, D, H, c.yH, 200), 50);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DIBUJO LÁMINA — CIRCULAR
+// ═══════════════════════════════════════════════════════════════════════
+function dibujarLaminaCirc(canvasId, D, yD, size) {
+  size = size || 260;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const cx = size/2, cy = size/2, r = size*0.42;
+  ctx.clearRect(0, 0, size, size);
+
+  // Tubería
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = '#f8f9fa'; ctx.fill();
+
+  // Lámina de agua
+  const y = yD * 2 * r;  // altura en px
+  const yTop = cy + r - y;
+  const h = Math.max(0, Math.min(y, 2*r));
+  if (h > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 1.5, 0, 2*Math.PI);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(26,115,232,0.35)';
+    ctx.fillRect(cx - r, yTop, 2*r, h);
+    ctx.restore();
+    // Línea superficie
+    ctx.beginPath();
+    ctx.moveTo(cx - r, yTop);
+    ctx.lineTo(cx + r, yTop);
+    ctx.strokeStyle = '#1a73e8'; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // Cota y
+  ctx.strokeStyle = '#e8711a'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(cx + r + 5, cy + r); ctx.lineTo(cx + r + 5, yTop); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#e8711a'; ctx.font = `bold ${Math.round(size*0.055)}px Segoe UI`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`y=${(yD*D*1000).toFixed(0)}mm`, cx + r + 8, (cy + r + yTop)/2 + 4);
+
+  // Diámetro
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#555'; ctx.font = `${Math.round(size*0.05)}px Segoe UI`; ctx.textAlign = 'center';
+  ctx.fillText(`Ø ${(D*1000).toFixed(0)} mm`, cx, cy - r - 8);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DIBUJO LÁMINA — OVOIDE
+// ═══════════════════════════════════════════════════════════════════════
+function dibujarLaminaOv(canvasId, D, H, yH, size) {
+  size = size || 260;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.width = size; canvas.height = Math.round(size * 1.3);
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, HH = canvas.height;
+  ctx.clearRect(0, 0, W, HH);
+
+  // Escala: H real → HH*0.85 px
+  const scaleY = HH * 0.85 / H;
+  const scaleX = W  * 0.75 / D;
+  const scale  = Math.min(scaleX, scaleY);
+  const Hpx = H * scale;
+  const Dpx = D * scale;
+  const ox  = W / 2;
+  const oy  = HH * 0.92;  // base del ovoide
+
+  // Dibujar perfil ovoide (aproximación: arco inferior semicircular radio D/2, arco superior radio D)
+  const rInf = Dpx / 2;
+  const rSup = Dpx;
+  const centroInf = oy - rInf;
+  const centroSup = oy - Hpx + rSup;  // centro arco superior
+
+  ctx.beginPath();
+  // Arco inferior (semicírculo)
+  ctx.arc(ox, centroInf, rInf, 0, Math.PI, true);
+  // Arco superior (arco de radio D centrado más arriba)
+  const angSup = Math.asin(rInf / rSup);
+  ctx.arc(ox, centroSup, rSup, Math.PI/2 + angSup, Math.PI/2 - angSup, true);
+  ctx.closePath();
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = '#f8f9fa'; ctx.fill();
+
+  // Lámina de agua
+  const yPx = yH * Hpx;
+  const yTopPx = oy - yPx;
+  if (yPx > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(ox, centroInf, rInf - 1.5, 0, Math.PI, true);
+    ctx.arc(ox, centroSup, rSup - 1.5, Math.PI/2 + angSup, Math.PI/2 - angSup, true);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = 'rgba(26,115,232,0.35)';
+    ctx.fillRect(ox - rSup, yTopPx, 2*rSup, yPx + 10);
+    ctx.restore();
+    ctx.beginPath();
+    ctx.moveTo(ox - rSup, yTopPx); ctx.lineTo(ox + rSup, yTopPx);
+    ctx.strokeStyle = '#1a73e8'; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // Cota y
+  ctx.strokeStyle = '#e8711a'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(ox + rSup + 5, oy); ctx.lineTo(ox + rSup + 5, yTopPx); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#e8711a'; ctx.font = `bold ${Math.round(size*0.05)}px Segoe UI`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`y=${(yH*H*100).toFixed(1)}cm`, ox + rSup + 8, (oy + yTopPx)/2 + 4);
+
+  // Etiqueta
+  ctx.fillStyle = '#555'; ctx.font = `${Math.round(size*0.045)}px Segoe UI`; ctx.textAlign = 'center';
+  ctx.fillText(`${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm`, ox, 16);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TABLA THORMANN & FRANKE
+// ═══════════════════════════════════════════════════════════════════════
+function renderTablaTF(highlightIdx) {
+  const step = 5; // cada 5 filas para no saturar
+  let html = `<table><thead><tr>
+    <th>y/D</th><th>A/All</th><th>Rh/Rh,ll</th><th>V/Vll</th><th>Q/Qll</th>
+  </tr></thead><tbody>`;
+  for (let i = 0; i < TF.length; i += step) {
+    const r = TF[i];
+    const hl = highlightIdx !== undefined && Math.abs(i - highlightIdx) < step ? ' class="highlight"' : '';
+    html += `<tr${hl}><td>${r.yD.toFixed(3)}</td><td>${r.A.toFixed(4)}</td><td>${r.Rh.toFixed(4)}</td><td>${r.V.toFixed(4)}</td><td>${r.Q.toFixed(4)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('tabla-tf-container').innerHTML = html;
+}
+
+function buscarTF() {
+  const qVal = parseFloat(document.getElementById('tf_q').value);
+  const yVal = parseFloat(document.getElementById('tf_y').value);
+  let row, tipo;
+  if (!isNaN(qVal)) { row = interpTF('Q', qVal); tipo = `Q/Qll = ${qVal}`; }
+  else if (!isNaN(yVal)) { row = interpTF('yD', yVal); tipo = `y/D = ${yVal}`; }
+  else return;
+
+  document.getElementById('tf_resultado_busqueda').innerHTML = `
+    <div class="alerta info" style="margin-bottom:.8rem">
+      🔍 Resultado para <b>${tipo}</b>:<br>
+      y/D = <b>${row.yD.toFixed(4)}</b> &nbsp;|&nbsp;
+      A/All = <b>${row.A.toFixed(4)}</b> &nbsp;|&nbsp;
+      Rh/Rh,ll = <b>${row.Rh.toFixed(4)}</b> &nbsp;|&nbsp;
+      V/Vll = <b>${row.V.toFixed(4)}</b> &nbsp;|&nbsp;
+      Q/Qll = <b>${row.Q.toFixed(4)}</b>
+    </div>`;
+  renderTablaTF();
+}
+
+function limpiarTF() {
+  document.getElementById('tf_q').value = '';
+  document.getElementById('tf_y').value = '';
+  document.getElementById('tf_resultado_busqueda').innerHTML = '';
+  renderTablaTF();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GRÁFICAS
+// ═══════════════════════════════════════════════════════════════════════
+let chartCirc = null, chartOv = null;
+
+function initCharts() {
+  // — Circular —
+  const step = 4;
+  const labels = TF.filter((_, i) => i % step === 0).map(r => r.yD.toFixed(2));
+  const dQ  = TF.filter((_, i) => i % step === 0).map(r => ({ x: r.Q,  y: r.yD }));
+  const dV  = TF.filter((_, i) => i % step === 0).map(r => ({ x: r.V,  y: r.yD }));
+  const dA  = TF.filter((_, i) => i % step === 0).map(r => ({ x: r.A,  y: r.yD }));
+  const dRh = TF.filter((_, i) => i % step === 0).map(r => ({ x: r.Rh, y: r.yD }));
+
+  const cfgCirc = {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: 'Q/Qll', data: dQ,  borderColor: '#1a73e8', backgroundColor: 'transparent', showLine: true, pointRadius: 0, borderWidth: 2.5 },
+        { label: 'V/Vll', data: dV,  borderColor: '#e8711a', backgroundColor: 'transparent', showLine: true, pointRadius: 0, borderWidth: 2.5 },
+        { label: 'A/All', data: dA,  borderColor: '#1e8c45', backgroundColor: 'transparent', showLine: true, pointRadius: 0, borderWidth: 2, borderDash: [5,3] },
+        { label: 'Rh/Rh,ll', data: dRh, borderColor: '#9b59b6', backgroundColor: 'transparent', showLine: true, pointRadius: 0, borderWidth: 2, borderDash: [3,3] },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: 'Relación adimensional' }, min: 0, max: 1.2 },
+        y: { title: { display: true, text: 'y/D' }, min: 0, max: 1 }
+      },
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x.toFixed(3)}  (y/D=${ctx.parsed.y.toFixed(3)})`
+        }
+      }}
+    }
+  };
+  chartCirc = new Chart(document.getElementById('chart_circular'), cfgCirc);
+
+  // — Ovoide —
+  const ovQ_pts = OV_Q.map(p => ({ x: p[1], y: p[0] }));
+  const ovV_pts = OV_V.map(p => ({ x: p[1], y: p[0] }));
+
+  const cfgOv = {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: 'Q/Qll', data: ovQ_pts, borderColor: '#1a73e8', backgroundColor: 'transparent', showLine: true, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'V/Vll', data: ovV_pts, borderColor: '#e8711a', backgroundColor: 'transparent', showLine: true, pointRadius: 3, borderWidth: 2.5 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: 'Relación adimensional (Q/Qll, V/Vll)' }, min: 0, max: 1.3 },
+        y: { title: { display: true, text: 'y/H' }, min: 0, max: 1 }
+      },
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x.toFixed(3)}  (y/H=${ctx.parsed.y.toFixed(3)})`
+        }
+      }}
+    }
+  };
+  chartOv = new Chart(document.getElementById('chart_ovoide'), cfgOv);
+}
+
+// Lector circular
+function updateLectorCirc() {
+  const sl  = document.getElementById('lect_circ_slider');
+  const num = document.getElementById('lect_circ_num');
+  if (document.activeElement === sl) num.value = sl.value;
+  else sl.value = num.value;
+  const yD = parseFloat(sl.value);
+  const row = interpTF('yD', yD);
+  document.getElementById('lect_circ_res').innerHTML = `
+    <div class="val-box"><div class="vb-label">y/D</div><div class="vb-val">${yD.toFixed(3)}</div></div>
+    <div class="val-box"><div class="vb-label">Q/Qll</div><div class="vb-val">${row.Q.toFixed(4)}</div></div>
+    <div class="val-box"><div class="vb-label">V/Vll</div><div class="vb-val">${row.V.toFixed(4)}</div></div>
+    <div class="val-box"><div class="vb-label">A/All</div><div class="vb-val">${row.A.toFixed(4)}</div></div>
+    <div class="val-box"><div class="vb-label">Rh/Rh,ll</div><div class="vb-val">${row.Rh.toFixed(4)}</div></div>
+  `;
+}
+
+// Lector ovoide
+function updateLectorOv() {
+  const sl  = document.getElementById('lect_ov_slider');
+  const num = document.getElementById('lect_ov_num');
+  if (document.activeElement === sl) num.value = sl.value;
+  else sl.value = num.value;
+  const yH = parseFloat(sl.value);
+  const qRel = interpOv(OV_Q, yH);
+  const vRel = interpOv(OV_V, yH);
+  document.getElementById('lect_ov_res').innerHTML = `
+    <div class="val-box"><div class="vb-label">y/H</div><div class="vb-val">${yH.toFixed(3)}</div></div>
+    <div class="val-box"><div class="vb-label">Q/Qll</div><div class="vb-val">${qRel.toFixed(4)}</div></div>
+    <div class="val-box"><div class="vb-label">V/Vll</div><div class="vb-val">${vRel.toFixed(4)}</div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  renderTablaTF();
+  initCharts();
+  updateLectorCirc();
+  updateLectorOv();
+  calcEj1();
+  calcEj2();
+  calcEj3();
+});
+</script>
+</body>
+</html>
