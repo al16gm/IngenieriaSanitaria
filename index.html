@@ -734,7 +734,7 @@ function calcEj2() {
   // Calcular D técnico
   // Q = (1/n)*(D/4)^(2/3)*sqrt(j)*(pi*D^2/4)
   // Q = (1/n)*sqrt(j)*pi/4 * (1/4)^(2/3) * D^(8/3)
-  const K = (1/n) * Math.sqrt(j) * Math.PI/4 * Math.pow(1/4, 2/3);
+  const K = (1/n) * Math.sqrt(j) * (Math.PI/4) * Math.pow(1/4, 2/3);
   const Dtec = Math.pow(Qmax / K, 3/8);
 
   // Diámetros comerciales (mm)
