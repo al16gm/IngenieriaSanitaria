@@ -1034,41 +1034,55 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   canvas.width  = size;
-  canvas.height = Math.round(size * 1.35);
+  canvas.height = Math.round(size * 1.4);
   const ctx = canvas.getContext('2d');
   const W = canvas.width, CH = canvas.height;
   ctx.clearRect(0, 0, W, CH);
 
-  // Escala
-  const scale = Math.min(W * 0.75 / D, CH * 0.85 / H);
-  const Dpx   = D * scale;   // ancho en px
-  const Hpx   = H * scale;   // alto total en px
-  const rInf  = Dpx / 2;     // radio semicírculo inferior (D/2)
-  const rSup  = Dpx;         // radio arco superior (D)
+  // Escala para que el ovoide quepa bien
+  const scale = Math.min(W * 0.70 / D, CH * 0.82 / H);
+  const Dpx = D * scale;   // ancho máximo en px (parte superior)
+  const Hpx = H * scale;   // altura total en px
+  const rInf = Dpx / 2;    // radio semicírculo inferior = D/2
+  const rSup = Dpx;        // radio arco superior = D
 
-  // Centro horizontal
-  const cx  = W / 2;
-  // Base del ovoide (parte inferior)
-  const yBase = CH * 0.93;
-  // Centro del semicírculo inferior
-  const cInf = yBase - rInf;
-  // Punto de tangencia entre semicírculo y arco superior
-  // El semicírculo inferior llega hasta y = cInf - rInf = yBase - 2*rInf = yBase - Dpx
-  const yJuntura = yBase - Dpx;  // = cInf - rInf
-  // Centro del arco superior: debe pasar por los puntos (cx±rInf, yJuntura)
-  // y el punto más alto (cx, yBase - Hpx)
-  const yTop   = yBase - Hpx;
-  const cSup   = yTop + rSup;   // centro arco superior
+  const cx    = W / 2;
+  const yBase = CH * 0.92;          // base del ovoide (punto más bajo)
+  const yTop  = yBase - Hpx;        // punto más alto del ovoide
 
-  // Ángulo donde el arco superior conecta con el semicírculo inferior
-  const angSup = Math.asin(rInf / rSup);
+  // Centro del semicírculo inferior: a rInf del fondo
+  const cInfY = yBase - rInf;
 
-  // Dibujar perfil ovoide
+  // El semicírculo inferior ocupa desde yBase hasta yBase - Dpx (= yBase - 2*rInf)
+  // La unión entre semicírculo inferior y arco superior está en y = yBase - Dpx
+  const yUnion = yBase - Dpx;
+
+  // Centro del arco superior:
+  // El arco superior tiene radio rSup = Dpx
+  // Debe pasar por los puntos (cx ± rInf, yUnion) y por (cx, yTop)
+  // Centro en (cx, yTop + rSup)
+  const cSupY = yTop + rSup;
+
+  // Ángulo de conexión en el arco superior
+  // En el punto (cx + rInf, yUnion): 
+  // sin(angSup) = rInf/rSup = 0.5 → angSup = 30° = π/6
+  const angSup = Math.asin(rInf / rSup); // = π/6 ≈ 0.5236 rad
+
+  // ── Dibujar perfil del ovoide ──────────────────────────────────
   ctx.beginPath();
-  // Semicírculo inferior (parte estrecha, abajo): de 0 a π (de derecha a izquierda por abajo)
-  ctx.arc(cx, cInf, rInf, 0, Math.PI, false);  // arco inferior
-  // Arco superior (parte ancha, arriba)
-  ctx.arc(cx, cSup, rSup, Math.PI - angSup + Math.PI, angSup, false);
+  // 1) Semicírculo inferior (de derecha a izquierda, pasando por abajo)
+  //    Empieza en ángulo 0 (derecha) y va hasta π (izquierda), sentido horario
+  //    pero arc() con false es antihorario → usamos true para ir por abajo
+  ctx.arc(cx, cInfY, rInf, 0, Math.PI, false); // arco inferior antihorario (por abajo)
+
+  // 2) Arco superior (de izquierda a derecha, pasando por arriba)
+  //    En el punto izquierdo de unión: ángulo desde cSupY
+  //    Punto unión izquierdo: (cx - rInf, yUnion)
+  //    Ángulo desde centro superior: π + angSup (abajo-izquierda)
+  //    Punto unión derecho: (cx + rInf, yUnion)  
+  //    Ángulo desde centro superior: -angSup = 2π - angSup (abajo-derecha)
+  ctx.arc(cx, cSupY, rSup, Math.PI + angSup, 2*Math.PI - angSup, false);
+
   ctx.closePath();
   ctx.strokeStyle = '#444';
   ctx.lineWidth   = 3;
@@ -1076,26 +1090,22 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
   ctx.fillStyle   = '#f8f9fa';
   ctx.fill();
 
-  // Lámina de agua
-  // y se mide desde la base (yBase) hacia arriba
-  const yPx    = yH * Hpx;          // altura lámina en px
-  const ySupLam = yBase - yPx;       // coordenada Y de la superficie libre
+  // ── Lámina de agua ─────────────────────────────────────────────
+  const yPx     = yH * Hpx;           // altura lámina en px
+  const ySupLam = yBase - yPx;        // coordenada Y de la superficie libre
 
-  if (yPx > 0) {
+  if (yPx > 1) {
     ctx.save();
-    // Clip al interior del ovoide
     ctx.beginPath();
-    ctx.arc(cx, cInf, rInf - 1, 0, Math.PI, false);
-    ctx.arc(cx, cSup, rSup - 1, Math.PI - angSup + Math.PI, angSup, false);
+    ctx.arc(cx, cInfY, rInf - 1.5, 0, Math.PI, false);
+    ctx.arc(cx, cSupY, rSup - 1.5, Math.PI + angSup, 2*Math.PI - angSup, false);
     ctx.closePath();
     ctx.clip();
-    // Rellenar agua
     ctx.fillStyle = 'rgba(26,115,232,0.30)';
     ctx.fillRect(cx - rSup, ySupLam, 2 * rSup, yPx + 5);
     ctx.restore();
 
     // Línea superficie libre
-    // Calcular ancho de la lámina en esa altura
     ctx.beginPath();
     ctx.moveTo(cx - rSup, ySupLam);
     ctx.lineTo(cx + rSup, ySupLam);
@@ -1104,7 +1114,7 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
     ctx.stroke();
   }
 
-  // Cota y (flecha lateral)
+  // ── Cota y ─────────────────────────────────────────────────────
   ctx.strokeStyle = '#e8711a';
   ctx.lineWidth   = 1.5;
   ctx.setLineDash([4, 3]);
@@ -1113,27 +1123,18 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
   ctx.lineTo(cx + rSup + 8, ySupLam);
   ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle  = '#e8711a';
-  ctx.font       = `bold ${Math.round(size * 0.05)}px Segoe UI`;
-  ctx.textAlign  = 'left';
-  ctx.fillText(`y=${(yH * H * 100).toFixed(1)}cm`, cx + rSup + 12, (yBase + ySupLam) / 2 + 4);
+  ctx.fillStyle = '#e8711a';
+  ctx.font      = `bold ${Math.round(size * 0.05)}px Segoe UI`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`y=${(yH*H*100).toFixed(1)}cm`, cx + rSup + 12, (yBase + ySupLam)/2 + 4);
 
-  // Etiqueta dimensiones
-  ctx.fillStyle  = '#555';
-  ctx.font       = `${Math.round(size * 0.045)}px Segoe UI`;
-  ctx.textAlign  = 'center';
-  ctx.fillText(`${(D * 100).toFixed(0)}×${(H * 100).toFixed(0)} cm`, cx, 15);
-
-  // Línea D (diámetro en la parte más ancha)
-  ctx.strokeStyle = '#aaa';
-  ctx.lineWidth   = 1;
-  ctx.setLineDash([3, 3]);
-  ctx.beginPath();
-  ctx.moveTo(cx - rSup, cSup);
-  ctx.lineTo(cx + rSup, cSup);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // ── Etiqueta dimensiones ───────────────────────────────────────
+  ctx.fillStyle = '#555';
+  ctx.font      = `${Math.round(size * 0.045)}px Segoe UI`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm`, cx, 15);
 }
+
 
 
 // ═══════════════════════════════════════════════════════════════════════
