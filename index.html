@@ -1031,65 +1031,75 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
   size = size || 260;
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  canvas.width = size; canvas.height = Math.round(size * 1.3);
+  canvas.width = size;
+  canvas.height = size;
+
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, HH = canvas.height;
-  ctx.clearRect(0, 0, W, HH);
+  ctx.clearRect(0, 0, size, size);
 
-  // Escala: H real → HH*0.85 px
-  const scaleY = HH * 0.85 / H;
-  const scaleX = W  * 0.75 / D;
-  const scale  = Math.min(scaleX, scaleY);
-  const Hpx = H * scale;
-  const Dpx = D * scale;
-  const ox  = W / 2;
-  const oy  = HH * 0.92;  // base del ovoide
+  const w = size * 0.5;   // ancho base
+  const h = size * 0.8;   // altura total
+  const cx = size / 2;
+  const top = size * 0.1;
+  const bottom = top + h;
 
-  // Dibujar perfil ovoide (aproximación: arco inferior semicircular radio D/2, arco superior radio D)
-  const rInf = Dpx / 2;
-  const rSup = Dpx;
-  const centroInf = oy - rInf;
-  const centroSup = oy - Hpx + rSup;  // centro arco superior
-
+  // =========================
+  // DIBUJO OVOIDE REAL
+  // =========================
   ctx.beginPath();
-  // Arco inferior (semicírculo)
-  ctx.arc(ox, centroInf, rInf, 0, Math.PI, true);
-  // Arco superior (arco de radio D centrado más arriba)
-  const angSup = Math.asin(rInf / rSup);
-  ctx.arc(ox, centroSup, rSup, Math.PI/2 + angSup, Math.PI/2 - angSup, true);
+
+  // Punto inferior
+  ctx.moveTo(cx, bottom);
+
+  // Lado izquierdo (Bezier)
+  ctx.bezierCurveTo(
+    cx - w * 0.45, bottom - h * 0.15,
+    cx - w * 0.55, top + h * 0.6,
+    cx, top
+  );
+
+  // Lado derecho (simétrico)
+  ctx.bezierCurveTo(
+    cx + w * 0.55, top + h * 0.6,
+    cx + w * 0.45, bottom - h * 0.15,
+    cx, bottom
+  );
+
   ctx.closePath();
-  ctx.strokeStyle = '#555'; ctx.lineWidth = 3; ctx.stroke();
-  ctx.fillStyle = '#f8f9fa'; ctx.fill();
 
-  // Lámina de agua
-  const yPx = yH * Hpx;
-  const yTopPx = oy - yPx;
-  if (yPx > 0) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(ox, centroInf, rInf - 1.5, 0, Math.PI, true);
-    ctx.arc(ox, centroSup, rSup - 1.5, Math.PI/2 + angSup, Math.PI/2 - angSup, true);
-    ctx.closePath();
-    ctx.clip();
-    ctx.fillStyle = 'rgba(26,115,232,0.35)';
-    ctx.fillRect(ox - rSup, yTopPx, 2*rSup, yPx + 10);
-    ctx.restore();
-    ctx.beginPath();
-    ctx.moveTo(ox - rSup, yTopPx); ctx.lineTo(ox + rSup, yTopPx);
-    ctx.strokeStyle = '#1a73e8'; ctx.lineWidth = 2; ctx.stroke();
-  }
+  ctx.strokeStyle = '#555';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = '#f8f9fa';
+  ctx.fill();
 
-  // Cota y
-  ctx.strokeStyle = '#e8711a'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
-  ctx.beginPath(); ctx.moveTo(ox + rSup + 5, oy); ctx.lineTo(ox + rSup + 5, yTopPx); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = '#e8711a'; ctx.font = `bold ${Math.round(size*0.05)}px Segoe UI`;
-  ctx.textAlign = 'left';
-  ctx.fillText(`y=${(yH*H*100).toFixed(1)}cm`, ox + rSup + 8, (oy + yTopPx)/2 + 4);
+  // =========================
+  // LÁMINA DE AGUA
+  // =========================
+  const yPix = yH * h;
+  const yTop = bottom - yPix;
 
-  // Etiqueta
-  ctx.fillStyle = '#555'; ctx.font = `${Math.round(size*0.045)}px Segoe UI`; ctx.textAlign = 'center';
-  ctx.fillText(`${(D*100).toFixed(0)}×${(H*100).toFixed(0)} cm`, ox, 16);
+  ctx.save();
+  ctx.clip();
+
+  ctx.fillStyle = 'rgba(26,115,232,0.35)';
+  ctx.fillRect(cx - w, yTop, 2 * w, yPix);
+
+  ctx.restore();
+
+  // Línea de agua
+  ctx.beginPath();
+  ctx.moveTo(cx - w * 0.6, yTop);
+  ctx.lineTo(cx + w * 0.6, yTop);
+  ctx.strokeStyle = '#1a73e8';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Texto
+  ctx.fillStyle = '#1a73e8';
+  ctx.font = `bold ${Math.round(size*0.05)}px Segoe UI`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`y = ${(yH * H * 100).toFixed(0)} cm`, cx, top - 8);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
