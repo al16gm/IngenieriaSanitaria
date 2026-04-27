@@ -847,21 +847,23 @@ function calcEj3() {
   const n    = +document.getElementById('e3_n').value;
 
   // Caudales
-  const consumo = pob * dot / 86400;  // m³/s
-  const Qmn     = CR * consumo;
-  const Qpn     = Cp * Qmn;
-  const Qmin    = 0.2 * Qmn;
-  const Qmax    = Qpn + Qpl;
+  const consumo_ls  = pob * dot / 86400;   // 875 l/s
+  const consumo     = consumo_ls / 1000;   // 0.875 m³/s
+  const Qmn  = CR * consumo;               // 0.700 m³/s
+  const Qpn  = Cp * Qmn;                   // 0.980 m³/s
+  const Qmin = 0.2 * Qmn;                  // 0.140 m³/s
+  const Qmax = Qpn + Qpl;                  // 2.324 m³/s
 
-  // Predimensionamiento: suponer y/H = 0.8 → Q/Qll ≈ 0.88
-  const qRelPre = 0.88;
-  const QllNec  = Qmax / qRelPre;
+  // Con Qmax = 2.324 m³/s y suponiendo Q/Qll = 0.95:
+  const qRelPre = 0.95;
+  const QllNec  = Qmax / qRelPre;   // 2.324/0.95 = 2.446 m³/s
 
-  // Calcular D técnico para ovoide
-  // Qll = (1/n) * (0.2895*D)^(2/3) * sqrt(j) * 0.6375*D^2
-  // Qll = (1/n)*sqrt(j)*0.6375 * 0.2895^(2/3) * D^(2/3+2)
-  const K3 = (1/n) * Math.sqrt(j) * 0.6375 * Math.pow(0.2895, 2/3);
+  // K para ovoide:
+  // Qll = (1/n) · (0.2895·D)^(2/3) · sqrt(j) · 0.6375·D²
+  // Qll = (1/n) · sqrt(j) · 0.2895^(2/3) · 0.6375 · D^(8/3)
+  const K3 = (1/n) * Math.sqrt(j) * Math.pow(0.2895, 2/3) * 0.6375;
   const Dtec = Math.pow(QllNec / K3, 3/8);
+  // Dtec ≈ 1.517 m → ovoide comercial 120×180 cm ✅
 
   // Elegir comercial
   const ovCom = OVOIDES_COM.find(o => o.D >= Dtec) || OVOIDES_COM[OVOIDES_COM.length-1];
@@ -1031,76 +1033,108 @@ function dibujarLaminaOv(canvasId, D, H, yH, size) {
   size = size || 260;
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  canvas.width = size;
-  canvas.height = size;
-
+  canvas.width  = size;
+  canvas.height = Math.round(size * 1.35);
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, size, size);
+  const W = canvas.width, CH = canvas.height;
+  ctx.clearRect(0, 0, W, CH);
 
-  const w = size * 0.5;   // ancho base
-  const h = size * 0.8;   // altura total
-  const cx = size / 2;
-  const top = size * 0.1;
-  const bottom = top + h;
+  // Escala
+  const scale = Math.min(W * 0.75 / D, CH * 0.85 / H);
+  const Dpx   = D * scale;   // ancho en px
+  const Hpx   = H * scale;   // alto total en px
+  const rInf  = Dpx / 2;     // radio semicírculo inferior (D/2)
+  const rSup  = Dpx;         // radio arco superior (D)
 
-  // =========================
-  // DIBUJO OVOIDE REAL
-  // =========================
+  // Centro horizontal
+  const cx  = W / 2;
+  // Base del ovoide (parte inferior)
+  const yBase = CH * 0.93;
+  // Centro del semicírculo inferior
+  const cInf = yBase - rInf;
+  // Punto de tangencia entre semicírculo y arco superior
+  // El semicírculo inferior llega hasta y = cInf - rInf = yBase - 2*rInf = yBase - Dpx
+  const yJuntura = yBase - Dpx;  // = cInf - rInf
+  // Centro del arco superior: debe pasar por los puntos (cx±rInf, yJuntura)
+  // y el punto más alto (cx, yBase - Hpx)
+  const yTop   = yBase - Hpx;
+  const cSup   = yTop + rSup;   // centro arco superior
+
+  // Ángulo donde el arco superior conecta con el semicírculo inferior
+  const angSup = Math.asin(rInf / rSup);
+
+  // Dibujar perfil ovoide
   ctx.beginPath();
-
-  // Punto inferior
-  ctx.moveTo(cx, bottom);
-
-  // Lado izquierdo (Bezier)
-  ctx.bezierCurveTo(
-    cx - w * 0.45, bottom - h * 0.15,
-    cx - w * 0.55, top + h * 0.6,
-    cx, top
-  );
-
-  // Lado derecho (simétrico)
-  ctx.bezierCurveTo(
-    cx + w * 0.55, top + h * 0.6,
-    cx + w * 0.45, bottom - h * 0.15,
-    cx, bottom
-  );
-
+  // Semicírculo inferior (parte estrecha, abajo): de 0 a π (de derecha a izquierda por abajo)
+  ctx.arc(cx, cInf, rInf, 0, Math.PI, false);  // arco inferior
+  // Arco superior (parte ancha, arriba)
+  ctx.arc(cx, cSup, rSup, Math.PI - angSup + Math.PI, angSup, false);
   ctx.closePath();
-
-  ctx.strokeStyle = '#555';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth   = 3;
   ctx.stroke();
-  ctx.fillStyle = '#f8f9fa';
+  ctx.fillStyle   = '#f8f9fa';
   ctx.fill();
 
-  // =========================
-  // LÁMINA DE AGUA
-  // =========================
-  const yPix = yH * h;
-  const yTop = bottom - yPix;
+  // Lámina de agua
+  // y se mide desde la base (yBase) hacia arriba
+  const yPx    = yH * Hpx;          // altura lámina en px
+  const ySupLam = yBase - yPx;       // coordenada Y de la superficie libre
 
-  ctx.save();
-  ctx.clip();
+  if (yPx > 0) {
+    ctx.save();
+    // Clip al interior del ovoide
+    ctx.beginPath();
+    ctx.arc(cx, cInf, rInf - 1, 0, Math.PI, false);
+    ctx.arc(cx, cSup, rSup - 1, Math.PI - angSup + Math.PI, angSup, false);
+    ctx.closePath();
+    ctx.clip();
+    // Rellenar agua
+    ctx.fillStyle = 'rgba(26,115,232,0.30)';
+    ctx.fillRect(cx - rSup, ySupLam, 2 * rSup, yPx + 5);
+    ctx.restore();
 
-  ctx.fillStyle = 'rgba(26,115,232,0.35)';
-  ctx.fillRect(cx - w, yTop, 2 * w, yPix);
+    // Línea superficie libre
+    // Calcular ancho de la lámina en esa altura
+    ctx.beginPath();
+    ctx.moveTo(cx - rSup, ySupLam);
+    ctx.lineTo(cx + rSup, ySupLam);
+    ctx.strokeStyle = '#1a73e8';
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+  }
 
-  ctx.restore();
-
-  // Línea de agua
+  // Cota y (flecha lateral)
+  ctx.strokeStyle = '#e8711a';
+  ctx.lineWidth   = 1.5;
+  ctx.setLineDash([4, 3]);
   ctx.beginPath();
-  ctx.moveTo(cx - w * 0.6, yTop);
-  ctx.lineTo(cx + w * 0.6, yTop);
-  ctx.strokeStyle = '#1a73e8';
-  ctx.lineWidth = 2;
+  ctx.moveTo(cx + rSup + 8, yBase);
+  ctx.lineTo(cx + rSup + 8, ySupLam);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle  = '#e8711a';
+  ctx.font       = `bold ${Math.round(size * 0.05)}px Segoe UI`;
+  ctx.textAlign  = 'left';
+  ctx.fillText(`y=${(yH * H * 100).toFixed(1)}cm`, cx + rSup + 12, (yBase + ySupLam) / 2 + 4);
 
-  // Texto
-  ctx.fillStyle = '#1a73e8';
-  ctx.font = `bold ${Math.round(size*0.05)}px Segoe UI`;
-  ctx.textAlign = 'center';
-  ctx.fillText(`y = ${(yH * H * 100).toFixed(0)} cm`, cx, top - 8);
+  // Etiqueta dimensiones
+  ctx.fillStyle  = '#555';
+  ctx.font       = `${Math.round(size * 0.045)}px Segoe UI`;
+  ctx.textAlign  = 'center';
+  ctx.fillText(`${(D * 100).toFixed(0)}×${(H * 100).toFixed(0)} cm`, cx, 15);
+
+  // Línea D (diámetro en la parte más ancha)
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(cx - rSup, cSup);
+  ctx.lineTo(cx + rSup, cSup);
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // TABLA THORMANN & FRANKE
